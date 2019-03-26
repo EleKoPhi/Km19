@@ -11,11 +11,7 @@ void Controller::Begin()
   _userHandler.StartUp();
   _drawer.DrawErr(_userHandler.SdStatus, _userHandler.NfcStatus, _userHandler.RtcStatus);  
   _drawer.DrawMain();
-  _currentUser = String("");
-  _additionalUser = String("");
-  _currentUserId = String("");
-  _additionalUserId = String("");
-  _currentStatus = WaitForCard;
+  this->Reset();
 }
 
 void Controller::PutCurrentStatus(char stat)
@@ -57,6 +53,7 @@ char Controller::StateTransitions()
     this->PutCurrentStatus(Einfach);
     _startTime = millis();
     this->UpDateTime();
+	_userHandler.WriteToLog(Einfach, _currentUser.c_str(), _additionalUser.c_str(), _currentUserId.c_str(), _additionalUserId.c_str());
     return Einfach;
   }
 
@@ -65,6 +62,7 @@ char Controller::StateTransitions()
     this->PutCurrentStatus(Doppelt);
     _startTime = millis();
     this->UpDateTime();
+	_userHandler.WriteToLog(Doppelt, _currentUser.c_str(), _additionalUser.c_str(),_currentUserId.c_str(), _additionalUserId.c_str());
     return Doppelt;
   }
 
@@ -131,22 +129,14 @@ void Controller::States(char Status)
   {
     int progress = ((_deltaTime*100)/25)/100;
     this->_drawer.DisplayProgress(progress);
-    if(this->TimeOut(2500))
-    {
-      Serial.println(_currentUserId);
-      _userHandler.WriteToLog(Einfach, _currentUserId,_additionalUserId);
-    }
+	this->TimeOut(2500);
   }
 
   if (Status == Doppelt)
   {
     int progress = ((_deltaTime*10)/5)/100;
     this->_drawer.DisplayProgress(progress);
-    if(this->TimeOut(5000))
-    {
-      Serial.println(_currentUserId);
-       _userHandler.WriteToLog(Doppelt, _currentUserId,_additionalUserId);
-    }
+	this->TimeOut(5000);
   }
 
   if (Status == WaitForSplitBooking)
@@ -189,4 +179,17 @@ void Controller::Reset()
   _additionalUser = String("");
   _currentUserId = String("");
   _additionalUserId = String("");
+  Serial.println("Reset!");
+  Serial.println(GetCurrentStatus());
+}
+
+
+String Controller::GetCurrentUser()
+{
+	return this->_currentUser;
+}
+
+void Controller::SetCurrentUser(String user)
+{
+	_currentUser = user;
 }
