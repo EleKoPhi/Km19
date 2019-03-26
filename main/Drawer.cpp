@@ -35,6 +35,16 @@ void Drawer::DrawErr(bool sdStatus, bool nfcStatus, bool rtcStatus)
   }
 }
 
+void Drawer::DrawLastUser(String lastUser)
+{
+	_display.clearBuffer();
+	_display.setFont(u8g2_font_ncenB08_tr);
+	this->DrawCenter("Letzter Nutzer...", 8);
+	_display.setFont(u8g2_font_ncenB12_tr);
+	this->DrawCenter(lastUser, 30);
+	_display.sendBuffer();
+}
+
 void Drawer::DrawDes(String user)
 {
   int pos = (128 - _display.getStrWidth(user.c_str())) / 2;
@@ -94,4 +104,26 @@ void Drawer::DrawCenter(String txt, int y)
 {
   char pos = (128 - _display.getStrWidth(txt.c_str()))/2;
   _display.drawStr(pos, y, txt.c_str());
+}
+
+void Drawer::DrawKaffeeKing(String King)
+{
+	_display.clearBuffer();
+	_display.setFont(u8g2_font_ncenB08_tr);
+	this->DrawCenter("Kaffee König...", 8);
+	_display.setFont(u8g2_font_ncenB12_tr);
+	this->DrawCenter(King, 30);
+	_display.sendBuffer();
+
+}
+
+void Drawer::DrawCurrentAmount(int amount)
+{
+	String a = String(amount, DEC);
+	_display.clearBuffer();
+	_display.setFont(u8g2_font_ncenB08_tr);
+	this->DrawCenter("Anzahl Bezuege", 8);
+	_display.setFont(u8g2_font_ncenB12_tr);
+	this->DrawCenter(a, 30);
+	_display.sendBuffer();
 }

@@ -26,6 +26,8 @@ String UserHandler::CheckIfExists(String cardID)
   cardID.toCharArray(cardBuf, sizeof(cardBuf));
   _userData.read(UserFiled, sizeof(UserFiled));
 
+  _userData.close();
+
   bool compareFlag = true;
 
   for (filedIterator = 0; filedIterator <= sizeof(UserFiled) - 1; filedIterator++)
@@ -57,7 +59,7 @@ String UserHandler::CheckIfExists(String cardID)
         String userName;
         while (UserFiled[filedIterator + i + 1] != '\n')
         {
-			if(String(UserFiled[filedIterator + i + 2]) == "\n")break;
+		  if(String(UserFiled[filedIterator + i + 2]) == "\n") break;
           userName += String(UserFiled[filedIterator + i + 2]);
           i++;
         }
@@ -115,7 +117,6 @@ String UserHandler::GetCardId()
       code = ((code + _nfcReader.uid.uidByte[i]) * 10);
     }
   }
-  Serial.println(GetMoment());
   return String(code, DEC);
 }
 
@@ -148,7 +149,6 @@ void UserHandler::WriteToLog(char state, String user1, String user2, String user
     if (state == Einfach)
     {
 	  String logLine = GetMoment() + ";" + user1 + ";" + userId1 + ";1";
-      Serial.println(logLine);
       this->_logFile.println(logLine);
     }
 
@@ -156,8 +156,7 @@ void UserHandler::WriteToLog(char state, String user1, String user2, String user
     {
       if (user2.c_str() == "")
       {
-		  String logLine = GetMoment() + ";" + user1 + ";" + userId1 + ";2";
-        Serial.println(logLine);
+		String logLine = GetMoment() + ";" + user1 + ";" + userId1 + ";2";
         this->_logFile.println(logLine);
       }
       else
@@ -177,3 +176,21 @@ void UserHandler::WriteToLog(char state, String user1, String user2, String user
 
   this->_logFile.close();
 }
+
+String UserHandler::GetLastUser()
+{
+	SD.begin(_cspin);
+	_logFile = SD.open("userLog.txt", FILE_READ);
+
+	String log = "";
+
+	while(_logFile.read() != -1)
+	{
+		log += String(_logFile.read());
+	}
+
+	_logFile.close();
+
+	Serial.println(log);
+}
+

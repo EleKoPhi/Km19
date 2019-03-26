@@ -16,6 +16,9 @@ class Drawer
     void DisplayProgress(int progress);
     void Clear();
     void DrawCenter(String txt, int y);
+	void DrawLastUser(String lastUser);
+	void DrawKaffeeKing(String King);
+	void DrawCurrentAmount(int amount);
   private:
     U8G2_SSD1306_128X32_UNIVISION_F_SW_I2C _display;
 };

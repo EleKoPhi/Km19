@@ -25,4 +25,7 @@ enum MillStates
 	WaitForSplitBooking = 5,
 	IdentSecondPayer = 6,
 	UnknownUserState = 7,
+	LastUserState = 8,
+	CurrentDrawsState = 9,
+	KaffeeKingState = 10
 };

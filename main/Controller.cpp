@@ -26,10 +26,74 @@ char Controller::GetCurrentStatus()
 
 char Controller::StateTransitions()
 {
-  if (_currentStatus == WaitForCard && _userHandler.HasCardToRead())
+  if ((_currentStatus == WaitForCard || _currentStatus == LastUserState || _currentStatus == KaffeeKingState || _currentStatus== CurrentDrawsState) && _userHandler.HasCardToRead())
   {
     this->PutCurrentStatus(ReadCard);
     return ReadCard;
+  }
+
+  if(_currentStatus == WaitForCard && _userHandler.ReadUserInput() == 'l')
+  {
+	  this->PutCurrentStatus(LastUserState);
+	  _startTime = millis();
+	  this->UpDateTime();
+	  return LastUserState;
+  }
+
+  if(_currentStatus == LastUserState && _userHandler.ReadUserInput() == 'l')
+  {
+	  this->PutCurrentStatus(CurrentDrawsState);
+	  _startTime = millis();
+	  this->UpDateTime();
+	  return CurrentDrawsState;
+  }
+
+  if(_currentStatus == CurrentDrawsState && _userHandler.ReadUserInput() == 'l')
+  {
+	  this->PutCurrentStatus(KaffeeKingState);
+	  _startTime = millis();
+	  this->UpDateTime();
+	  return KaffeeKingState;
+  }
+
+  if(_currentStatus == KaffeeKingState && _userHandler.ReadUserInput() == 'l')
+  {
+	  this->PutCurrentStatus(WaitForCard);
+	  _startTime = millis();
+	  this->UpDateTime();
+	  return WaitForCard;
+  }
+
+  if(_currentStatus == WaitForCard && _userHandler.ReadUserInput() == 'r')
+  {
+	  this->PutCurrentStatus(KaffeeKingState);
+	  _startTime = millis();
+	  this->UpDateTime();
+	  return KaffeeKingState;
+  }
+
+  if(_currentStatus == KaffeeKingState && _userHandler.ReadUserInput() == 'r')
+  {
+	  this->PutCurrentStatus(CurrentDrawsState);
+	  _startTime = millis();
+	  this->UpDateTime();
+	  return CurrentDrawsState;
+  }
+
+  if(_currentStatus == CurrentDrawsState && _userHandler.ReadUserInput() == 'r')
+  {
+	  this->PutCurrentStatus(LastUserState);
+	  _startTime = millis();
+	  this->UpDateTime();
+	  return LastUserState;
+  }
+
+  if(_currentStatus == LastUserState && _userHandler.ReadUserInput() == 'r')
+  {
+	  this->PutCurrentStatus(WaitForCard);
+	  _startTime = millis();
+	  this->UpDateTime();
+	  return WaitForCard;
   }
 
   if (_currentStatus == ReadCard && _currentUser == "Unknow user")
@@ -89,11 +153,9 @@ bool Controller::TimeOut(int time)
 {
   if (_deltaTime >= time)
   {
-    Serial.println(_deltaTime, DEC);
     this->Reset();
     return true;
   }
-
   return false;
 }
 
@@ -169,6 +231,25 @@ void Controller::States(char Status)
     _drawer.DrawUnknown();
     this->TimeOut(2500);
   }
+
+  if(Status == LastUserState)
+  {
+	  _drawer.DrawLastUser("Test");
+	  //_userHandler.GetLastUser();
+	  this->TimeOut(10000);
+  }
+
+  if(Status == CurrentDrawsState)
+  {
+	  _drawer.DrawCurrentAmount(100);
+	  this->TimeOut(10000);
+  }
+
+  if(Status == KaffeeKingState)
+  {
+	  _drawer.DrawKaffeeKing("Test");
+	  this->TimeOut(10000);
+  }
 }
 
 void Controller::Reset()
@@ -179,8 +260,6 @@ void Controller::Reset()
   _additionalUser = String("");
   _currentUserId = String("");
   _additionalUserId = String("");
-  Serial.println("Reset!");
-  Serial.println(GetCurrentStatus());
 }
 
 

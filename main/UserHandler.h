@@ -20,6 +20,7 @@ class UserHandler
     String GetCardId();
     String GetMoment();
     void WriteToLog(char state ,String user1, String user2, String userId1, String userId2);
+	String GetLastUser();
     
     bool SdStatus;
     bool NfcStatus;
