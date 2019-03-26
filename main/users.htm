@@ -1,0 +1,102 @@
+<html>
+<head>
+	<title></title>
+	<style type="text/css">
+		#usertable tr:nth-child(even) {
+			background: #dedede
+		}
+
+		#usertable tr:nth-child(odd) {
+			background: #FFF
+		}
+	</style>
+	<script type="text/javascript">
+		function editUser(button) {
+			var columns = button.parentNode.parentNode.children;
+			var cardId = columns[0].innerText;
+			var name = columns[1].innerText;
+			var price = columns[2].innerText;
+
+			document.getElementById("editCardId").value = cardId;
+			document.getElementById("editName").value = name;
+			document.getElementById("editPrice").value = price.replace("€","");
+
+			document.getElementById("editForm").style = "display:block";
+			document.getElementById("usertable").style = "display:none";
+		}
+		function cancelEdit() {
+			document.getElementById("editForm").style = "display:none";
+			document.getElementById("usertable").style = "display:block";
+		}
+	</script>
+</head>
+<body>
+	<div id="editForm" style="display: none">
+		<h1>edit</h1>
+		<form action="users.htm" method="get">
+			<table>
+				<thead>
+					<tr>
+						<th>Card ID</th>
+						<th>Name</th>
+						<th>Personal Price</th>
+						<th>Change</th>
+					</tr>
+				</thead>
+				<tr>
+					<td>
+						<input id="editCardId" name="editCardId" type="text" value="" readonly="readonly" /></td>
+					<td>
+						<input id="editName" name="editName" type="text" value="" /></td>
+					<td>
+						<input id="editPrice" name="editPrice" type="text" value="" />€</td>
+					<td>
+						<input type="submit" value="confirm" /></td>
+				</tr>
+				<tr>
+					<td />
+					<td />
+					<td />
+					<td>
+						<input type="reset" value="cancel" onclick="cancelEdit()" />
+					</td>
+				</tr>
+			</table>
+		</form>
+	</div>
+	<table id="usertable">
+		<thead>
+			<tr>
+				<th>Card ID</th>
+				<th>Name</th>
+				<th>Personal Price</th>
+				<th>Change</th>
+			</tr>
+		</thead>
+		<tr>
+			<td>xyz</td>
+			<td>Werner Schunn</td>
+			<td>0.85€</td>
+			<td>
+				<button onclick="editUser(this)">edit</button>
+			</td>
+		</tr>
+		<tr>
+			<td>abc</td>
+			<td>Philipp Mochti</td>
+			<td>0.10€</td>
+			<td>
+				<button onclick="editUser(this)">edit</button>
+			</td>
+		</tr>
+		<tr>
+			<td>qwert</td>
+			<td>Thomas Krämer</td>
+			<td></td>
+			<td>
+				<button onclick="editUser(this)">edit</button>
+			</td>
+		</tr>
+	</table>
+</body>
+</html>
