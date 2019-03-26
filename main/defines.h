@@ -1,7 +1,7 @@
 // PIN DEFINES
 
-#define taster_LINKS_pin 6
-#define taster_RECHTS_pin 7
+#define taster_LINKS_pin 7
+#define taster_RECHTS_pin 6
 #define nfc_RS_pin 2
 #define display_CLK_pin 0
 #define display_DATA_pin 1

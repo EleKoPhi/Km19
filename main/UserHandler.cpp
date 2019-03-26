@@ -57,6 +57,7 @@ String UserHandler::CheckIfExists(String cardID)
         String userName;
         while (UserFiled[filedIterator + i + 1] != '\n')
         {
+			if(String(UserFiled[filedIterator + i + 2]) == "\n")break;
           userName += String(UserFiled[filedIterator + i + 2]);
           i++;
         }
@@ -124,22 +125,29 @@ String UserHandler::GetMoment()
   _rtc.begin();
   DateTime now = _rtc.now();
   _nfcReader.PCD_Init();  // Shit :O
-  Moment = String(now.year(), DEC) + "-" + String(now.month(), DEC) + "-" + String(now.day(), DEC) + " " + String(now.hour(), DEC) + ":" + String(now.minute(), DEC) + ":" + String(now.second(), DEC);
+  Moment = String(now.year(), DEC) + "-";
+  if(now.month() < 10)Moment += "0";
+  Moment += String(now.month(), DEC) + "-";
+  if(now.day() < 10)Moment += "0";
+  Moment += String(now.day(), DEC) + " ";
+  if(now.hour() < 10)Moment += "0";
+  Moment += String(now.hour(), DEC) + ":";
+  if(now.minute() < 10)Moment += "0";
+  Moment += String(now.minute(), DEC) + " ";
+
   return Moment;
 }
 
-void UserHandler::WriteToLog(char state, String user1, String user2)
+void UserHandler::WriteToLog(char state, String user1, String user2, String userId1, String userId2)
 {
 
-  Serial.println(user1);
-  Serial.println(user2);
   this->_logFile = SD.open("UserLog.txt", FILE_WRITE);
 
   if (this->_logFile)
   {
     if (state == Einfach)
     {
-      String logLine = "1_" + user1 + "_" + GetMoment();
+	  String logLine = GetMoment() + ";" + user1 + ";" + userId1 + ";1";
       Serial.println(logLine);
       this->_logFile.println(logLine);
     }
@@ -148,16 +156,14 @@ void UserHandler::WriteToLog(char state, String user1, String user2)
     {
       if (user2.c_str() == "")
       {
-        String logLine = "2_" + user1 + "_" + GetMoment();
+		  String logLine = GetMoment() + ";" + user1 + ";" + userId1 + ";2";
         Serial.println(logLine);
         this->_logFile.println(logLine);
       }
       else
       {
-        String logLine1 = "1_" + user1 + "_" + GetMoment();
-        Serial.println(logLine1);
-        String logLine2 = "1_" + user2 + "_" + GetMoment();
-        Serial.println(logLine2);
+		String logLine1 = GetMoment() + ";" + user1 + ";" + userId1 + ";1";
+		String logLine2 = GetMoment() + ";" + user2 + ";" + userId2 + ";1";
         this->_logFile.println(logLine1);
         this->_logFile.println(logLine2);
       }
@@ -170,5 +176,4 @@ void UserHandler::WriteToLog(char state, String user1, String user2)
   }
 
   this->_logFile.close();
-
 }

@@ -18,6 +18,9 @@ class Controller
   void States(char Status);
   bool TimeOut(int time);
   void Reset();
+
+  String GetCurrentUser();
+  void SetCurrentUser(String user);
   
   
   private:

@@ -19,7 +19,7 @@ class UserHandler
     bool HasCardToRead();
     String GetCardId();
     String GetMoment();
-    void WriteToLog(char state ,String user1, String user2);
+    void WriteToLog(char state ,String user1, String user2, String userId1, String userId2);
     
     bool SdStatus;
     bool NfcStatus;
