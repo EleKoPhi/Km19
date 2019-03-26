@@ -15,12 +15,14 @@
 #define SECRET_PASS "Werner"
 
 // STATES
-
-#define WaitForCard 0
-#define ReadCard 1
-#define WaitForInput 2
-#define Doppelt 3
-#define Einfach 4
-#define WaitForSplitBooking 5
-#define IdentSecondPayer 6
-#define UnknownUserState 7 
+enum MillStates
+{
+	WaitForCard = 0,
+	ReadCard = 1,
+	WaitForInput = 2,
+	Doppelt = 3,
+	Einfach = 4,
+	WaitForSplitBooking = 5,
+	IdentSecondPayer = 6,
+	UnknownUserState = 7,
+};

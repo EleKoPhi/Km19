@@ -1,3 +1,4 @@
+#include <RTClib.h>
 #include <Arduino.h>
 #include "defines.h"
 #include "Controller.h"
