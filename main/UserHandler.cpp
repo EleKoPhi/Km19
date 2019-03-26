@@ -10,6 +10,7 @@ UserHandler::UserHandler(int chipSelect, int slaveSelect, int rstPin) : _nfcRead
 {
   _cspin = chipSelect;
   SdStatus = false;
+  deboundeStatus = false;
 }
 
 String UserHandler::CheckIfExists(String cardID)
@@ -87,10 +88,27 @@ void UserHandler::StartUp()
   pinMode(taster_RECHTS_pin, INPUT);
 }
 
+
 char UserHandler::ReadUserInput()
 {
-  if (digitalRead(taster_LINKS_pin))return 'l';
-  if (digitalRead(taster_RECHTS_pin))return 'r';
+	/*if(!digitalRead(taster_LINKS_pin) && !digitalRead(taster_RECHTS_pin))
+	{
+		deboundeStatus = false;
+	}*/
+
+	if(digitalRead(taster_LINKS_pin) /*&& !deboundeStatus*/)
+	{
+		//deboundeStatus = true;
+		Serial.println("l");
+		return 'l';
+	}
+	if(digitalRead(taster_RECHTS_pin)/* && !deboundeStatus*/)
+	{
+		//deboundeStatus = true;
+		Serial.println("r");
+		return 'r';
+	}
+
   return 'n';
 }
 

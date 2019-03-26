@@ -66,6 +66,7 @@ char Controller::StateTransitions()
 
   if(_currentStatus == WaitForCard && _userHandler.ReadUserInput() == 'r')
   {
+	  Serial.println("Go to KaffeKingState");
 	  this->PutCurrentStatus(KaffeeKingState);
 	  _startTime = millis();
 	  this->UpDateTime();

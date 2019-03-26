@@ -13,7 +13,7 @@ void Drawer::DrawMain()
   _display.setFont(u8g2_font_ncenB14_tr);
   this->DrawCenter("UX-ES-2",14);
   _display.setFont(u8g2_font_ncenB08_tr);
-  this->DrawCenter("Mit Karte identifizieren",32);
+  this->DrawCenter("Ident mit Karte",32);
   _display.sendBuffer();
 }
 
@@ -110,7 +110,7 @@ void Drawer::DrawKaffeeKing(String King)
 {
 	_display.clearBuffer();
 	_display.setFont(u8g2_font_ncenB08_tr);
-	this->DrawCenter("Kaffee König...", 8);
+	this->DrawCenter("Kaffee Koenig...", 8);
 	_display.setFont(u8g2_font_ncenB12_tr);
 	this->DrawCenter(King, 30);
 	_display.sendBuffer();

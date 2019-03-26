@@ -21,12 +21,10 @@ class UserHandler
     String GetMoment();
     void WriteToLog(char state ,String user1, String user2, String userId1, String userId2);
 	String GetLastUser();
-    
+
     bool SdStatus;
     bool NfcStatus;
     bool RtcStatus;
-
-    
 
   private:
     MFRC522 _nfcReader;
@@ -34,6 +32,8 @@ class UserHandler
     File _logFile;
     RTC_DS3231 _rtc;
     int _cspin;
+	
+	bool deboundeStatus;
 
 };
 
