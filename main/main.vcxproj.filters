@@ -16,6 +16,21 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="main.ino" />
+    <None Include="config.htm">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="index.htm">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="log.htm">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="start.htm">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="users.htm">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="__vm\.main.vsarduino.h">

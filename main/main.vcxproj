@@ -98,8 +98,23 @@
     <ProjectCapability Include="VisualMicro" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="config.htm">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="index.htm">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="log.htm">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
     <None Include="main.ino">
       <FileType>CppCode</FileType>
+    </None>
+    <None Include="start.htm">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="users.htm">
+      <DeploymentContent>true</DeploymentContent>
     </None>
   </ItemGroup>
   <ItemGroup>
