@@ -7,19 +7,19 @@ Drawer::Drawer(int clk, int data): _display(U8G2_R0, clk, data, U8X8_PIN_NONE)
   _display.begin();
 }
 
+void Drawer::Clear()
+{
+	_display.clearBuffer();
+	_display.sendBuffer();
+}
+
 void Drawer::DrawMain()
 {
   _display.clearBuffer();
   _display.setFont(u8g2_font_ncenB14_tr);
   this->DrawCenter("UX-ES-2",14);
   _display.setFont(u8g2_font_ncenB08_tr);
-  this->DrawCenter("Ident mit Karte",32);
-  _display.sendBuffer();
-}
-
-void Drawer::Clear()
-{
-  _display.clearBuffer();
+  this->DrawCenter("! Karte auflegen !",32);
   _display.sendBuffer();
 }
 
@@ -47,21 +47,14 @@ void Drawer::DrawLastUser(String lastUser)
 
 void Drawer::DrawDes(String user)
 {
-  int pos = (128 - _display.getStrWidth(user.c_str())) / 2;
-
   _display.clearBuffer();
   _display.setFont(u8g2_font_ncenB12_tr);
-
-  _display.drawStr(pos, 12, user.c_str());
-
+  this->DrawCenter(user, 12);
   _display.setFont(u8g2_font_ncenB08_tr);
   _display.drawStr(0, 24, "<-");
   _display.drawStr(128 - _display.getStrWidth("->"), 24, "->");
-
-  pos = (128 - _display.getStrWidth("Bitte waehlen")) / 2;
-
   _display.setFont(u8g2_font_ncenB08_tr);
-  _display.drawStr(pos, 32, "Bitte waehlen");
+  this->DrawCenter("Bitte waehlen", 32);
   _display.sendBuffer();
 }
 
@@ -72,7 +65,6 @@ void Drawer::DrawSplitQ()
   this->DrawCenter("Zweifach",8);
   this->DrawCenter("Weiter per Knopfdruck",20);
   this->DrawCenter("Ident Zweitnutzer",32);
-  
   _display.sendBuffer();
 }
 
@@ -85,7 +77,7 @@ void Drawer::DisplayProgress(int progress)
 
   for(int i=0;i<=progress/10;i++)
   {
-    _display.drawBox(i*10+1+3*i, 21, 10, 10);
+    _display.drawBox(i*13+1, 21, 10, 10);
   }
   _display.sendBuffer();
 }
