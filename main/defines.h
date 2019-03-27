@@ -8,7 +8,6 @@
 #define nfc_SS_pin 11
 #define sd_CS_pin 4
 
-
 // WEB SERVER DEFINES
 
 #define SECRET_SSID "Werners Kaffeestube"

@@ -16,9 +16,9 @@ void Drawer::Clear()
 void Drawer::DrawMain()
 {
   _display.clearBuffer();
-  _display.setFont(u8g2_font_ncenB14_tr);
-  this->DrawCenter("UX-ES-2",14);
-  _display.setFont(u8g2_font_ncenB08_tr);
+  _display.setFont(u8g2_font_ncenB10_tr);
+  this->DrawCenter("UX-ES-2",12);
+  _display.setFont(u8g2_font_ncenB10_tr);
   this->DrawCenter("! Karte auflegen !",32);
   _display.sendBuffer();
 }

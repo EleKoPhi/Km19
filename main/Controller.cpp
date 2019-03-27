@@ -4,7 +4,7 @@
 #include "Controller.h"
 #include "defines.h"
 
-Controller :: Controller(int chipSelect, int slaveSelect, int rstPin, int clk, int data) : _drawer(clk, data), _userHandler(chipSelect, slaveSelect, rstPin) {}
+Controller :: Controller(int chipSelect, int slaveSelect, int rstPin, int clk, int data) : _drawer(clk, data), _userHandler(chipSelect, slaveSelect, rstPin)/* _wifi() */{}
 
 void Controller::Begin()
 {

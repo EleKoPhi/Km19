@@ -4,7 +4,7 @@
 #include "Arduino.h"
 #include "UserHandler.h"
 #include "Drawer.h"
-
+#include "WebServer.h"
 
 class Controller
 {
@@ -27,6 +27,7 @@ class Controller
   private:
   Drawer _drawer;
   UserHandler _userHandler;
+  WebServer _wifi;
   char _currentStatus;
   
   String _currentUser;
@@ -37,5 +38,6 @@ class Controller
   
   unsigned long _startTime, _currentTime, _deltaTime;
 };
+
 
 #endif
