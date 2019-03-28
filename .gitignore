@@ -1,3 +1,7 @@
 *.user
 *.suo
 /main/__vm
+.vs
+*.pdb
+*.aps
+Debug

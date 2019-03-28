@@ -1,12 +1,112 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN"
+    "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
 <html>
 <head>
+	<meta http-equiv="Content-Type" content="text/html;charset=ISO-8859-1" />
 	<title></title>
 	<style type="text/css">
+		tr:nth-child(even) {
+			background: #dedede
+		}
+
+		tr:nth-child(odd) {
+			background: #FFF
+		}
+
+		th {
+			padding: 5px;
+		}
+
+		td {
+			text-align: center;
+		}
+
+		th {
+			background-color: #519fff;
+		}
 	</style>
 	<script type="text/javascript">
+		function downloadAndReset() {
+			if (confirm("really reset the current log file?") !== true)
+				return false;
+			return true;
+		}
+
+		function downloadFile(sender) {
+			var fileinput = sender.children[0].children[0];
+			var columns = sender.parentNode.parentNode.children;
+			var filename = columns[0].innerText;
+
+			fileinput.value = filename;
+		}
 	</script>
 </head>
 <body>
-	log
+	<div>
+		<h1>last entries</h1>
+		<table>
+			<thead>
+				<tr>
+					<th>timestamp</th>
+					<th>cardId</th>
+					<th>username</th>
+					<th>type<br />
+						(1=single,
+						<br />
+						2=double)</th>
+				</tr>
+			</thead>
+			[entry]
+			<tr>
+				<td>[timestamp]</td>
+				<td>[cardid]</td>
+				<td>[username]</td>
+				<td>[type]</td>
+			</tr>
+			[/entry]
+		</table>
+	</div>
+	<div>
+		<br />
+		<h1>log files</h1>
+		<table>
+			<thead>
+				<tr>
+					<th>filename</th>
+					<th>entries</th>
+					<th>action</th>
+				</tr>
+			</thead>
+			<tr>
+				<td>current.csv</td>
+				<td>[currententries]</td>
+				<td>
+					<form action="log.htm" method="get" onsubmit="downloadAndReset()">
+						<div>
+							<input type="hidden" name="action" value="downloadAndReset" />
+							<input type="submit" value="download&reset" />
+						</div>
+					</form>
+				</td>
+			</tr>
+
+			[file]
+			<tr>
+				<td>[filename]</td>
+				<td>-</td>
+				<td>
+					<form action="log.htm" method="get" onsubmit="downloadFile(this)">
+						<div>
+							<input type="hidden" name="file" value="" />
+							<input type="hidden" name="action" value="downloadFile" />
+							<input type="submit" value="download" />
+						</div>
+					</form>
+				</td>
+			</tr>
+			[/file]
+		</table>
+	</div>
 </body>
 </html>

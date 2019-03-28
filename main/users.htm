@@ -1,5 +1,9 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN"
+    "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
 <html>
 <head>
+	<meta http-equiv="Content-Type" content="text/html;charset=ISO-8859-1" />
 	<title></title>
 	<style type="text/css">
 		#usertable tr:nth-child(even) {
@@ -8,6 +12,18 @@
 
 		#usertable tr:nth-child(odd) {
 			background: #FFF
+		}
+
+		th {
+			padding: 5px;
+		}
+
+		td {
+			text-align: center;
+		}
+
+		th {
+			background-color: #519fff;
 		}
 	</style>
 	<script type="text/javascript">
@@ -19,7 +35,6 @@
 
 			document.getElementById("editCardId").value = cardId;
 			document.getElementById("editName").value = name;
-			document.getElementById("editPrice").value = price.replace("€","");
 
 			document.getElementById("editForm").style = "display:block";
 			document.getElementById("usertable").style = "display:none";
@@ -39,7 +54,6 @@
 					<tr>
 						<th>Card ID</th>
 						<th>Name</th>
-						<th>Personal Price</th>
 						<th>Change</th>
 					</tr>
 				</thead>
@@ -48,8 +62,6 @@
 						<input id="editCardId" name="editCardId" type="text" value="" readonly="readonly" /></td>
 					<td>
 						<input id="editName" name="editName" type="text" value="" /></td>
-					<td>
-						<input id="editPrice" name="editPrice" type="text" value="" />€</td>
 					<td>
 						<input type="submit" value="confirm" /></td>
 				</tr>
@@ -69,34 +81,18 @@
 			<tr>
 				<th>Card ID</th>
 				<th>Name</th>
-				<th>Personal Price</th>
 				<th>Change</th>
 			</tr>
 		</thead>
+		[user]
 		<tr>
-			<td>xyz</td>
-			<td>Werner Schunn</td>
-			<td>0.85€</td>
+			<td>[cardid]</td>
+			<td>[username]</td>
 			<td>
 				<button onclick="editUser(this)">edit</button>
 			</td>
 		</tr>
-		<tr>
-			<td>abc</td>
-			<td>Philipp Mochti</td>
-			<td>0.10€</td>
-			<td>
-				<button onclick="editUser(this)">edit</button>
-			</td>
-		</tr>
-		<tr>
-			<td>qwert</td>
-			<td>Thomas Krämer</td>
-			<td></td>
-			<td>
-				<button onclick="editUser(this)">edit</button>
-			</td>
-		</tr>
+		[/user]
 	</table>
 </body>
 </html>
