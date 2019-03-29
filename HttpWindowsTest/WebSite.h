@@ -1,13 +1,24 @@
 #pragma once
+
+#include <set>
+using namespace std;
+
 class WebRequest;
 
 class WebSite
 {
-public:
-	WebSite();
-	~WebSite();
+	friend class WebServer;
+	friend class WebRequest;
 
-	virtual bool canHandle(WebRequest& request);
-	virtual void handleRequest(WebRequest& request);
+	string targetFileName;
+	string targetHtml;
+	set<string> matchingTargets;
+	void loadFile();
+public:
+	WebSite(string targetFile);
+	~WebSite();
+	WebSite* addTarget(const string& matchingTarget);
+	virtual bool canHandle(const WebRequest* request);
+	virtual void handleRequest(WebRequest* request);
 };
 

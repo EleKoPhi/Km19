@@ -1,9 +1,21 @@
 #include "stdafx.h"
 #include "WebServer.h"
+#include "WebSite.h"
 
-
-WebServer::WebServer() : Socket(NULL)
+WebServer::WebServer()
+	: Socket(NULL)
+	, index(WebSite("C:\\src\\Arduino\\Km19\\HttpWindowsTest\\Debug\\index.htm"))
+	, start(WebSite("C:\\src\\Arduino\\Km19\\HttpWindowsTest\\Debug\\start.htm"))
+	, users(WebSite("C:\\src\\Arduino\\Km19\\HttpWindowsTest\\Debug\\users.htm"))
+	, logs(WebSite("C:\\src\\Arduino\\Km19\\HttpWindowsTest\\Debug\\log.htm"))
+	, config(WebSite("C:\\src\\Arduino\\Km19\\HttpWindowsTest\\Debug\\config.htm"))
 {
+	index.addTarget("");
+	webSites.push_back(&index);
+	webSites.push_back(&start);
+	webSites.push_back(&users);
+	webSites.push_back(&logs);
+	webSites.push_back(&config);
 }
 
 
@@ -103,21 +115,7 @@ void WebServer::run()
 		CheckErrors(client, "Socket Connection");
 		printf("\nConnection Established!\n");
 
-		//const int BUFFERSIZE = 4096;
-		//char buffer[BUFFERSIZE];
-		//int newData;
-		//newData = recv(client, buffer, BUFFERSIZE, 0);
-		//printf("<<\n");
-		//printf(buffer);
-		//printf("\n");
-		//string request(buffer, newData);
-
-		//std::string response = "HTTP/1.1 200 OK\nDate: Mon, 27 Jul 2009 12 : 28 : 53 GMT\nServer : Apache / 2.2.14 (Win32)\nLast - Modified : Wed, 22 Jul 2009 19 : 15 : 56 GMT\nContent - Length : 88\nContent - Type : text / html\n\ntest\n";
-		//printf(">>\n");
-		//printf(response.c_str());
-		//printf("\n");
-		//send(client, response.c_str(), response.length(), 0);
-		WebRequest request(client);
+		WebRequest request(this, client);
 		request.processRequest();
 
 		close(client);
@@ -151,14 +149,15 @@ void WebRequest::parseRequest(const string& request)
 	if(start < 0)
 	{
 		args = "";
-		site = target;
+		target = target;
 	}
 	else
 	{
 		args = target.substr(start + 1);
-		site = target.substr(0, start);
+		target = target.substr(0, start);
 	}
-	log("site: '" + site + "', args: '" + args + "'");
+	this->target = target;
+	log("site: '" + target + "', args: '" + args + "'");
 
 	int eq, next = 0;
 	arguments.clear();
@@ -177,6 +176,11 @@ void WebRequest::parseRequest(const string& request)
 	}
 }
 
+WebRequest::~WebRequest()
+{
+	arguments.clear();
+}
+
 void WebRequest::processRequest()
 {
 	string request = readRequest();
@@ -188,13 +192,36 @@ void WebRequest::processRequest()
 	parseRequest(request);
 
 	log("\n");
+	try
+	{
+		for(WebSite* site : server->webSites)
+		{
+			if(site->canHandle(this))
+			{
+				log("site.canHandle: " + site->targetFileName);
 
-	std::string header = "HTTP/1.1 200 OK\n";
+				site->handleRequest(this);
+				return;
+			}
+		}
+		writeResponse("404 File not found!", "404 File not found");
+	}
+	catch(exception exc)
+	{
+		writeResponse("500 server error<br/>\n exception: " + string(exc.what()), "500 internal server error");
+		return;
+	}
+}
+
+void WebRequest::writeResponse(string content, string statusCodeAndText)
+{
+
+	std::string header = "HTTP/1.1 " + statusCodeAndText + " " + string("\n");
 	header = header + "Server: Arduino\n";
-	header = header + "Content-Length: 4\n";
+	header = header + "Content-Length: " + to_string(content.length()) + "\n";
 	header = header + "Content-Type: text/html\n\n";
 
-	header = header + "test";
+	header = header + content;
 	verbose(">>");
 	verbose(header);
 	verbose(">>/");
