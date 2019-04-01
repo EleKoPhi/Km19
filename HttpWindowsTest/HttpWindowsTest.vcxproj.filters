@@ -44,5 +44,20 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="test-link.url" />
+    <None Include="..\main\config.htm">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\main\index.htm">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\main\log.htm">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\main\start.htm">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\main\users.htm">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

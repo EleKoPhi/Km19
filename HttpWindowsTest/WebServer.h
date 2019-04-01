@@ -5,6 +5,13 @@ using namespace std;
 
 #include "WebSite.h"
 
+const int ListeningPort 
+#ifdef _DEBUG
+= 8888; 
+#else
+= 80;
+#endif
+
 class WebServer
 {
 	friend class WebRequest;

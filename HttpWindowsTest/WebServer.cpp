@@ -96,7 +96,7 @@ void WebServer::run()
 
 	destination.sin_family = AF_INET;
 
-	destination.sin_port = htons(80);
+	destination.sin_port = htons(ListeningPort);
 	destination.sin_addr.s_addr = INADDR_ANY;
 
 	Socket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
@@ -106,7 +106,7 @@ void WebServer::run()
 
 	while(true)
 	{
-		printf("\nListening on 80...");
+		log("\nListening on " + to_string(ListeningPort) + "...");
 		CheckErrors(listen(Socket, 5), "Listening on Socket");
 
 		struct sockaddr_in clientAddress;
@@ -167,6 +167,7 @@ void WebRequest::parseRequest(const string& request)
 		string name = args.substr(next, eq - next);
 		next = args.find_first_of('&', eq++);
 		string value = args.substr(eq, next - eq);
+
 		//replace + with spaces
 		for(int i = 0; (i = value.find('+', i)) >= 0; i++)
 			value.replace(i, 1, " ");
@@ -204,11 +205,11 @@ void WebRequest::processRequest()
 				return;
 			}
 		}
-		writeResponse("404 File not found!", "404 File not found");
+		writeResponse("404 File not found!", "404 not found");
 	}
 	catch(exception exc)
 	{
-		writeResponse("500 server error<br/>\n exception: " + string(exc.what()), "500 internal server error");
+		writeResponse("500 internal server error<br/>\n exception: " + string(exc.what()), "500 internal server error");
 		return;
 	}
 }

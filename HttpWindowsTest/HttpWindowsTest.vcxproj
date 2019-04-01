@@ -95,6 +95,9 @@
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
+    <PreBuildEvent>
+      <Command>copy /y "$(ProjectDir)..\main\*.htm" "$(LocalDebuggerWorkingDirectory)$(Configuration)"</Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -164,6 +167,21 @@
     <ClCompile Include="WebSite.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\main\config.htm">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="..\main\index.htm">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="..\main\log.htm">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="..\main\start.htm">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="..\main\users.htm">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
     <None Include="test-link.url" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
