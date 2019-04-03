@@ -154,6 +154,7 @@
     <ClInclude Include="targetver.h" />
     <ClInclude Include="WebServer.h" />
     <ClInclude Include="WebSite.h" />
+    <ClInclude Include="WebSitePlaceholders.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="HttpWindowsTest.cpp" />
@@ -165,6 +166,7 @@
     </ClCompile>
     <ClCompile Include="WebServer.cpp" />
     <ClCompile Include="WebSite.cpp" />
+    <ClCompile Include="WebSitePlaceholders.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\main\config.htm">
