@@ -141,7 +141,9 @@ void WebRequest::parseRequest(const string& request)
 	method = request.substr(0, start);
 	log("method: '" + method + "'");
 	int end = request.find_first_of(' ', ++start);
-	string target = request.substr(++start, end - start);
+	string target = "";
+	if(++start < end)
+		target = request.substr(start, end - start);
 	log("target: '" + target + "'");
 
 	start = target.find_first_of('?');

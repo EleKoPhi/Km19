@@ -2,7 +2,9 @@
 #include "WebSite.h"
 #include "WebServer.h"
 
-WebSite::WebSite(string targetFile) : targetFileName(targetFile)
+WebSite::WebSite(string targetFile)
+	: targetFileName(targetFile)
+	, targetHtml("")
 {
 	int i = targetFile.find_last_of('\\');
 	if(i < 0) i = targetFile.find_last_of('/');
@@ -45,7 +47,7 @@ bool WebSite::parseTags(WebSitePlaceholderGroup** group, string& fullHtml, strin
 		   || line[tagstart - 3] != '!'
 		   || line[tagstart - 4] != '<')
 			return false;
-		int tagend = line.find(']', tagstart);
+		size_t tagend = line.find(']', tagstart);
 		if(tagend < 0)
 			return false;
 
@@ -58,7 +60,7 @@ bool WebSite::parseTags(WebSitePlaceholderGroup** group, string& fullHtml, strin
 		}
 
 		string tag = line.substr(tagstart + 1, tagend - tagstart - 1);
-		int taglen = tag.length();
+		size_t taglen = tag.length();
 		bool isGroupStartTag = false;
 		bool isGroupEndTag = false;
 		for(size_t i = 0; i < taglen; i++)
@@ -125,41 +127,78 @@ bool WebSite::canHandle(const WebRequest* request)
 }
 void WebSite::handleRequest(WebRequest * request)
 {
-	fillPlaceholders();
+	processPlaceholders();
 
 	string html = siteTemplate.generate();
 	request->writeResponse(html);
 }
 
-void WebSite::fillPlaceholders()
+void WebSite::processPlaceholders()
 {
 	siteTemplate.childrenValues.clear();
-	fillPlaceholderGroup(siteTemplate);
+	siteTemplate.prepare();
+
+	fillPlaceholders();
 }
 
-void WebSite::fillPlaceholderGroup(WebSitePlaceholderGroup& group)
+void WebSite::fillPlaceholders()
 {
-	for(WebSitePlaceholder* child : group.childrenDefinitions)
 	{
-		child = child->clone();
-		group.childrenValues.push_back(child);
-		if(child->isGroup())
-			fillPlaceholderGroup(*(WebSitePlaceholderGroup*)child);
-		else
-			fillPlaceholderValue(*child);
+		map<string, string> values{{"currententries", "99"}};
+		setValues(values);
+	}
+	{
+		map<string, string> entry
+		{
+			{"timestamp", "2019-04-02 13:37"},
+		{"cardid", "xyz"},
+		{"username", "Werner Schunn"},
+		{"type", "1"},
+		};
+		setGroup("entry", entry);
+	}
+	{
+		map<string, string> entry
+		{
+			{"timestamp", "2019-04-02 13:39"},
+		{"cardid", "abc"},
+		{"username", "Philipp Mochti"},
+		{"type", "2"},
+		};
+		setGroup("entry", entry);
+	}
+	{
+		map<string, string> file
+		{
+			{"filename", "20190331_1339_123entries.log"},
+		};
+		setGroup("file", file);
 	}
 }
 
-void WebSite::fillPlaceholderValue(WebSitePlaceholder& value)
+void WebSite::setValues(const map<string, string>& values)
 {
+	siteTemplate.setValues(values);
+}
+
+void WebSite::setGroup(const string & groupname, const map<string, string>& values)
+{
+	siteTemplate.setGroup(groupname, values);
 }
 
 
 WebSitePlaceholder::WebSitePlaceholder()
+	: name("")
+	, value("")
+	, preceding("")
 {
 }
 
 WebSitePlaceholder::~WebSitePlaceholder()
+{
+}
+
+void WebSitePlaceholder::prepare()
 {
 }
 
@@ -181,6 +220,7 @@ WebSitePlaceholder * WebSitePlaceholder::clone()
 }
 
 WebSitePlaceholderGroup::WebSitePlaceholderGroup()
+	: parentGroup(NULL)
 {
 }
 
@@ -194,30 +234,111 @@ WebSitePlaceholderGroup::~WebSitePlaceholderGroup()
 
 string WebSitePlaceholderGroup::generate()
 {
-	string output = preceding
-	#ifdef _DEBUG
-		+ "<!--" + name + "-->"
-	#endif
-		;
+	string output = "";
+	if(isDummy())
+		output = output + preceding;
+#ifdef _DEBUG
+	output = output + "\n<!--" + name + "-->\n";
+#endif
+
 	//for(vector<WebSitePlaceholder*>* group : childrenValues)
 	for(WebSitePlaceholder* child : childrenValues)
 	{
 		output = output + child->generate();
 	}
 #ifdef _DEBUG
-	output = output + "<!--/" + name + "-->";
+	output = output + "\n<!--/" + name + "-->\n";
 #endif
 
 	return output;
 }
 
-vector<WebSitePlaceholder*>* WebSitePlaceholderGroup::addGroup()
+WebSitePlaceholderGroup* WebSitePlaceholderGroup::addGroup()
 {
-	vector<WebSitePlaceholder*>* group = new vector<WebSitePlaceholder*>();
-	for(WebSitePlaceholder* definition : childrenDefinitions)
-		group->push_back(definition->clone());
+	WebSitePlaceholderGroup* group = this->clone()->asGroup();
+	group->parentGroup = this;
+	group->prepare();
+
+	//if(!this->insertGroup(*group))
+	this->childrenValues.push_back(group);
+
 
 	return group;
+}
+
+bool WebSitePlaceholderGroup::insertGroup(WebSitePlaceholderGroup & group)
+{
+	//for(bool retry = true; retry == true; )
+	//{
+	//	retry = false;
+
+	for(auto it = this->childrenValues.begin(); it != this->childrenValues.end(); it++)
+	{
+		auto val = *it;
+		if(val->name != this->name)
+		{
+			this->childrenValues.insert(it, &group);
+			return true;
+		}
+		//else
+		//	if(val->asGroup()->isDummy)
+		//	{
+		//		parentGroup->childrenValues.erase(it);
+		//		retry = true;
+		//		break;
+		//	}
+	}
+	//}
+	return false;
+}
+void WebSitePlaceholderGroup::setValues(const map<string, string>& values)
+{
+	for(auto child : childrenValues)
+	{
+		if(child->name == "")
+			continue;
+		if(child->isGroup())
+			continue;
+		auto it = values.find(child->name);
+		if(it != values.end())
+		{
+			string value = it->second;
+			child->value = value;
+
+		}
+	}
+}
+
+void WebSitePlaceholderGroup::setGroup(const string & groupname, const map<string, string>& values)
+{
+	for(auto child : childrenValues)
+	{
+		if(child->name == "")
+			continue;
+		if(!child->isGroup())
+			continue;
+		if(child->name != groupname)
+			continue;
+		auto group = child->asGroup()->addGroup();
+		group->setValues(values);
+		return;
+	}
+	log("cannot set group '" + groupname + "': not found.");
+}
+
+void WebSitePlaceholderGroup::prepare()
+{
+	if(this->isDummy())
+		return;
+	for(WebSitePlaceholder* child : childrenDefinitions)
+	{
+		child = child->clone();
+		childrenValues.push_back(child);
+		if(child->isGroup())
+			child->asGroup()->prepare();
+		else
+			child->prepare();
+	}
 }
 
 WebSitePlaceholder * WebSitePlaceholderGroup::addValueDefinition(string name, string preceding)
@@ -248,3 +369,22 @@ void WebSitePlaceholderGroup::clearValues()
 	}
 	childrenValues.clear();
 }
+
+WebSitePlaceholder * WebSitePlaceholderGroup::clone()
+{
+	WebSitePlaceholderGroup* clone = new WebSitePlaceholderGroup();
+	clone->preceding = preceding;
+	clone->parentGroup = parentGroup;
+	cloneInternal(clone);
+	return clone;
+}
+
+void WebSitePlaceholderGroup::cloneInternal(WebSitePlaceholderGroup * clone)
+{
+	clone->name = name;
+	for(auto child : childrenDefinitions)
+	{
+		clone->childrenDefinitions.push_back(child->clone());
+	}
+}
+
