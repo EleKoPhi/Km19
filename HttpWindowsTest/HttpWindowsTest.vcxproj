@@ -154,6 +154,7 @@
     <ClInclude Include="targetver.h" />
     <ClInclude Include="WebServer.h" />
     <ClInclude Include="WebSite.h" />
+    <ClInclude Include="WebSiteImplementations.h" />
     <ClInclude Include="WebSitePlaceholders.h" />
   </ItemGroup>
   <ItemGroup>
@@ -166,6 +167,7 @@
     </ClCompile>
     <ClCompile Include="WebServer.cpp" />
     <ClCompile Include="WebSite.cpp" />
+    <ClCompile Include="WebSiteImplementations.cpp" />
     <ClCompile Include="WebSitePlaceholders.cpp" />
   </ItemGroup>
   <ItemGroup>

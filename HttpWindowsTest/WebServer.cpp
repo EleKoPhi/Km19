@@ -4,11 +4,11 @@
 
 WebServer::WebServer()
 	: Socket(NULL)
-	, index(WebSite("C:\\src\\Arduino\\Km19\\HttpWindowsTest\\Debug\\index.htm"))
-	, start(WebSite("C:\\src\\Arduino\\Km19\\HttpWindowsTest\\Debug\\start.htm"))
-	, users(WebSite("C:\\src\\Arduino\\Km19\\HttpWindowsTest\\Debug\\users.htm"))
-	, logs(WebSite("C:\\src\\Arduino\\Km19\\HttpWindowsTest\\Debug\\log.htm"))
-	, config(WebSite("C:\\src\\Arduino\\Km19\\HttpWindowsTest\\Debug\\config.htm"))
+	, index("index.htm")
+	, start()
+	, users()
+	, logs()
+	, config()
 {
 	index.addTarget("");
 	webSites.push_back(&index);

@@ -21,7 +21,11 @@ WebSite::WebSite(string targetFile)
 void WebSite::loadFile()
 {
 	ifstream target;
-	target.open(targetFileName);
+	target.open(
+	#ifdef _DEBUG
+		"C:\\src\\Arduino\\Km19\\HttpWindowsTest\\Debug\\" +
+	#endif
+		targetFileName);
 
 	string line;
 	WebSitePlaceholderGroup* masterGroup = &siteTemplate;
@@ -143,37 +147,7 @@ void WebSite::processPlaceholders()
 
 void WebSite::fillPlaceholders()
 {
-	{
-		map<string, string> values{{"currententries", "99"}};
-		setValues(values);
-	}
-	{
-		map<string, string> entry
-		{
-			{"timestamp", "2019-04-02 13:37"},
-		{"cardid", "xyz"},
-		{"username", "Werner Schunn"},
-		{"type", "1"},
-		};
-		setGroup("entry", entry);
-	}
-	{
-		map<string, string> entry
-		{
-			{"timestamp", "2019-04-02 13:39"},
-		{"cardid", "abc"},
-		{"username", "Philipp Mochti"},
-		{"type", "2"},
-		};
-		setGroup("entry", entry);
-	}
-	{
-		map<string, string> file
-		{
-			{"filename", "20190331_1339_123entries.log"},
-		};
-		setGroup("file", file);
-	}
+
 }
 
 void WebSite::setValues(const map<string, string>& values)

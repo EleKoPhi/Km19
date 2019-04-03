@@ -4,6 +4,7 @@
 using namespace std;
 
 #include "WebSite.h"
+#include "WebSiteImplementations.h"
 
 const int ListeningPort 
 #ifdef _DEBUG
@@ -24,10 +25,10 @@ class WebServer
 	vector<WebSite*> webSites;
 
 	WebSite index;
-	WebSite start;
-	WebSite users;
-	WebSite logs;
-	WebSite config;
+	StartSite start;
+	UserSite users;
+	LogSite logs;
+	ConfigSite config;
 
 	void log(string str) { printf((str + "\n").c_str()); }
 	void verbose(string str) { printf((str + "\n").c_str()); }
