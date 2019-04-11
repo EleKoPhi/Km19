@@ -6,9 +6,9 @@ using namespace std;
 #include "WebSite.h"
 #include "WebSiteImplementations.h"
 
-const int ListeningPort 
+const int ListeningPort
 #ifdef _DEBUG
-= 8888; 
+= 8888;
 #else
 = 80;
 #endif
@@ -21,7 +21,7 @@ class WebServer
 	SOCKET Socket;
 	void close(SOCKET socket = NULL);
 	void CheckErrors(int errorcode, const string& errortext);
-	
+
 	vector<WebSite*> webSites;
 
 	WebSite index;
@@ -39,6 +39,7 @@ public:
 	int init();
 	void run();
 
+	void decode(string& text);
 };
 
 class WebRequest
@@ -53,10 +54,13 @@ public:
 	string target;
 	string method;
 	map<string, string> arguments;
+	string getArgument(const string& key, string fallback = "");
 
 	WebRequest(WebServer* server, SOCKET socket) : client(socket), server(server) {}
 	~WebRequest();
 
 	void processRequest();
 	void writeResponse(string content, string statusCodeAndText = "200 OK");
+	void decode(string& text) { server->decode(text); }
 };
+

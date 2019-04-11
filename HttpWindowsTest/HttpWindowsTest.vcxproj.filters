@@ -33,6 +33,12 @@
     <ClInclude Include="WebSiteImplementations.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="UserHandler.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="FileIO.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -53,6 +59,12 @@
     <ClCompile Include="WebSiteImplementations.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="UserHandler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="FileIO.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="test-link.url" />
@@ -69,6 +81,12 @@
       <Filter>Resource Files</Filter>
     </None>
     <None Include="..\main\users.htm">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="user.csv">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="log.csv">
       <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>

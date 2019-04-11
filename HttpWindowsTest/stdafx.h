@@ -20,6 +20,9 @@
 #include <stdio.h>
 //#include <tchar.h>
 #include <Synchapi.h>
+#include <cstdint>
+#include <string>
+#include <fstream>
 
 #pragma comment (lib, "Ws2_32.lib")
 #define DEFAULT_BUFLEN 512

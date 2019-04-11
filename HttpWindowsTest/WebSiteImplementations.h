@@ -1,5 +1,4 @@
 #pragma once
-
 #include"WebSite.h"
 
 class LogSite : public WebSite
@@ -35,4 +34,5 @@ public:
 	StartSite() : WebSite("start.htm") {}
 	~StartSite() {}
 	virtual void fillPlaceholders();
+	virtual void handleRequest(WebRequest* request);
 };

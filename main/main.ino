@@ -1,3 +1,9 @@
+#include <U8x8lib.h>
+#include <U8g2lib.h>
+#include <require_cpp11.h>
+#include <MFRC522Extended.h>
+#include <MFRC522.h>
+#include <deprecated.h>
 #include <Arduino.h>
 #include "defines.h"
 #include "Controller.h"

@@ -16,7 +16,7 @@ UserHandler::UserHandler(int chipSelect, int slaveSelect, int rstPin) : _nfcRead
 String UserHandler::CheckIfExists(String cardID)
 {
   SD.begin(_cspin);
-  _userData = SD.open("USERTX~1.TXT", FILE_READ);
+  _userData = SD.open("user.txt", FILE_READ);
 
   char cardBuf[cardID.length() + 1];
   char UserFiled[_userData.available()];
@@ -138,7 +138,7 @@ String UserHandler::GetCardId()
   return String(code, DEC);
 }
 
-String UserHandler::GetMoment()
+String UserHandler::getTimestamp()
 {
   String Moment = "";
   _rtc.begin();
@@ -166,7 +166,7 @@ void UserHandler::WriteToLog(char state, String user1, String user2, String user
   {
     if (state == Einfach)
     {
-	  String logLine = GetMoment() + ";" + user1 + ";" + userId1 + ";1";
+	  String logLine = getTimestamp() + ";" + user1 + ";" + userId1 + ";1";
       this->_logFile.println(logLine);
     }
 
@@ -174,13 +174,13 @@ void UserHandler::WriteToLog(char state, String user1, String user2, String user
     {
       if (user2.c_str() == "")
       {
-		String logLine = GetMoment() + ";" + user1 + ";" + userId1 + ";2";
+		String logLine = getTimestamp() + ";" + user1 + ";" + userId1 + ";2";
         this->_logFile.println(logLine);
       }
       else
       {
-		String logLine1 = GetMoment() + ";" + user1 + ";" + userId1 + ";1";
-		String logLine2 = GetMoment() + ";" + user2 + ";" + userId2 + ";1";
+		String logLine1 = getTimestamp() + ";" + user1 + ";" + userId1 + ";1";
+		String logLine2 = getTimestamp() + ";" + user2 + ";" + userId2 + ";1";
         this->_logFile.println(logLine1);
         this->_logFile.println(logLine2);
       }

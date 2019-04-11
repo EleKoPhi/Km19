@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="ISO-8859-1" ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN"
-    "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+		  "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
 <html>
 <head>
 	<meta http-equiv="Content-Type" content="text/html;charset=ISO-8859-1" />
@@ -31,10 +31,11 @@
 			var columns = button.parentNode.parentNode.children;
 			var cardId = columns[0].innerText;
 			var name = columns[1].innerText;
-			var price = columns[2].innerText;
+			var isallowed = columns[2].innerText;
 
 			document.getElementById("editCardId").value = cardId;
 			document.getElementById("editName").value = name;
+			document.getElementById("editIsAllowed").checked = isallowed == "0"? false : true;
 
 			document.getElementById("editForm").style = "display:block";
 			document.getElementById("usertable").style = "display:none";
@@ -54,16 +55,23 @@
 					<tr>
 						<th>Card ID</th>
 						<th>Name</th>
+						<th>isAllowed</th>
 						<th>Change</th>
 					</tr>
 				</thead>
 				<tr>
 					<td>
-						<input id="editCardId" name="editCardId" type="text" value="" readonly="readonly" /></td>
+						<input id="editCardId" name="editCardId" type="text" value="" readonly="readonly" />
+					</td>
 					<td>
-						<input id="editName" name="editName" type="text" value="" /></td>
+						<input id="editName" name="editName" type="text" value="" />
+					</td>
 					<td>
-						<input type="submit" value="confirm" /></td>
+						<input id="editIsAllowed" name="editIsAllowed" type="checkbox" value="1" />
+					</td>
+					<td>
+						<input type="submit" value="confirm" />
+					</td>
 				</tr>
 				<tr>
 					<td />
@@ -81,13 +89,21 @@
 			<tr>
 				<th>Card ID</th>
 				<th>Name</th>
+				<th>isAllowed</th>
 				<th>Change</th>
 			</tr>
 		</thead>
 		<!--[user:]-->
 		<tr>
-			<td><!--[cardid]--></td>
-			<td><!--[username]--></td>
+			<td>
+				<!--[cardid]-->
+			</td>
+			<td>
+				<!--[username]-->
+			</td>
+			<td>
+				<!--[isallowed]-->
+			</td>
 			<td>
 				<button onclick="editUser(this)">edit</button>
 			</td>

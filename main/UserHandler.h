@@ -6,26 +6,29 @@
 #include <SPI.h>
 #include <MFRC522.h>
 #include <Wire.h>
-#include "RTClib.h"
+#include <RTClib.h>
 
+using string = String;
 
 class UserHandler
 {
   public:
     UserHandler(int chipSelect, int slaveSelect, int rstPin);
     
-    String CheckIfExists(String cardID);
+	string CheckIfExists(string cardID);
     void StartUp();
     char ReadUserInput();
     bool HasCardToRead();
-    String GetCardId();
-    String GetMoment();
-    void WriteToLog(char state ,String user1, String user2, String userId1, String userId2);
-	String GetLastUser();
+	string GetCardId();
+	string getTimestamp();
+    void WriteToLog(char state , string user1, string user2, string userId1, string userId2);
+	string GetLastUser();
 
     bool SdStatus;
     bool NfcStatus;
     bool RtcStatus;
+
+	const string UnknownUser = "unkonwn";
 
   private:
     MFRC522 _nfcReader;
