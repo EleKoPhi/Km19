@@ -5,6 +5,10 @@
 using namespace std;
 //using String = std::string;
 
+#ifndef ARDUINO
+const string TestFolder = "C:\\src\\Arduino\\Km19\\HttpWindowsTest\\Debug\\";
+#endif
+
 class User
 {
 public:
@@ -60,11 +64,28 @@ class LogEntry
 {
 public:
 	LogEntry() : timestamp(TimeStamp::now()) {}
+	LogEntry(const TimeStamp & timestamp, const string& cardId, const LogEntryType type) : timestamp(timestamp), cardId(cardId), type(type) {}
 	~LogEntry() {}
 	TimeStamp timestamp;
 	string cardId;
 	LogEntryType type;
 	string toString() { return timestamp.getDateTime() + "->" + cardId + ", type=" + to_string(type); }
+	static string csvHeader();
+	string toCsv(string username = "");
+	static string stdCardId(const string& cardId);
+};
+
+const static string UserFile = "users.csv";
+const static string LogFile = "log.csv";
+const static string ConfigFile = "config.csv";
+
+class Parameter
+{
+public:
+	Parameter(const string& name, const string& value) : name(name), value(value) {}
+	~Parameter() {}
+	string name;
+	string value;
 };
 
 class UserHandler
@@ -74,8 +95,8 @@ class UserHandler
 	void log(string str) { printf((str + "\n").c_str()); }
 
 	string writeLogLine(TimeStamp& timestamp, const string& cardId, LogEntryType entry);
-	string writeCardId(const string& cardId);
 public:
+
 	static UserHandler* getInstance();
 
 	map<string, User> readUsers();
@@ -84,9 +105,15 @@ public:
 	const string UnknownUser = "unkonwn";
 
 	void writeLog(const string& cardId, LogEntryType entry = LogEntryType::None);
-	vector<LogEntry> readLog(int maximum = 10);
+	vector<LogEntry> readLog(unsigned int maximum = 10, string filename = "");
 	int numberOfLogEntries();
 	vector<string> getOldLogFiles();
 	const int logEntryLength = 43;
+
+	void setParameter(const string& name, const string & value);
+	void setParameter(const string& name, const double  value);
+	string getParameter(const string& name);
+	double getParameterD(const string& name);
+	vector<Parameter> getParameters();
 };
 

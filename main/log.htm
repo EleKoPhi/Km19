@@ -30,6 +30,7 @@
 		function downloadAndReset() {
 			if (confirm("really reset the current log file?") !== true)
 				return false;
+			setTimeout(function () { location.reload(); }, 1000);
 			return true;
 		}
 
@@ -79,10 +80,10 @@
 				</tr>
 			</thead>
 			<tr>
-				<td>current.csv</td>
+				<td>current log</td>
 				<td><!--[currententries]--></td>
 				<td>
-					<form action="log.htm" method="get" onsubmit="downloadAndReset()">
+					<form action="log.htm" method="get" onsubmit="return downloadAndReset()">
 						<div>
 							<input type="hidden" name="action" value="downloadAndReset" />
 							<input type="submit" value="download&reset" />

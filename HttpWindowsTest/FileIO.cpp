@@ -1,10 +1,12 @@
 #include "stdafx.h"
 #include "FileIO.h"
+#include <sstream>
+#include "UserHandler.h"
 
 FileWriter::FileWriter(string fileName, FileMode mode)
 	: FileReader(fileName, mode)
-
 {
+	//this->open();
 }
 
 FileWriter::~FileWriter()
@@ -43,6 +45,14 @@ void FileWriter::write(const string& text)
 	file.print(text);
 #else
 	file.write(text.c_str(), text.length());
+	if(!file.good())
+	{
+		//string status;
+		//int flags = file.rdstate();
+		//if (flags & eofbit)
+		log("file.open('" + fileName + "') failed: " + to_string(file.rdstate()) + ", errno:" + strerror(errno));
+	}
+
 #endif
 }
 
@@ -80,6 +90,14 @@ streamoff FileReader::length()
 	streampos length = file.tellg();
 	file.seekg(0, backup);
 	return length;
+}
+
+bool FileReader::readToEnd(string & content)
+{
+	std::stringstream buffer;
+	buffer << file.rdbuf();
+	content = buffer.str();
+	return true;
 }
 
 bool FileReader::readLine(string & line)
@@ -123,13 +141,14 @@ void FileReader::open()
 #ifdef ARDUNIO
 	file.open(SD.open(fileName, mode));
 #else
-	file.open("E:\\" + fileName, mode);
+	string path = TestFolder + fileName;
+	file.open(path, mode | fstream::out);
 	if(!file.good())
 	{
 		//string status;
 		//int flags = file.rdstate();
 		//if (flags & eofbit)
-		log("file.open('E:\\" + fileName + "') failed: " + to_string(file.rdstate()) + ", errno:" + strerror(errno));
+		log("file.open('" + path + "') failed: " + to_string(file.rdstate()) + ", errno:" + strerror(errno));
 	}
 #endif
 }

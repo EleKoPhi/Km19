@@ -24,6 +24,7 @@ public:
 	void seek(streamoff offset, streampos from);
 	streamoff length();
 	bool readLine(string& line);
+	bool readToEnd(string &content);
 	string fileName;
 	FileMode mode;
 

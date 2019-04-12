@@ -2,6 +2,8 @@
 #include "WebSiteImplementations.h"
 #include "UserHandler.h"
 #include "WebServer.h"
+#include "FileIO.h"
+#include <filesystem>
 
 void LogSite::fillPlaceholders()
 {
@@ -38,7 +40,52 @@ void LogSite::fillPlaceholders()
 
 void LogSite::handleRequest(WebRequest * request)
 {
+	auto uh = UserHandler::getInstance();
+	string action = request->getArgument("action");
+	string folder = TestFolder;
+
+	string filename = "";
+	if(action == "downloadAndReset")
+	{
+		filename = TimeStamp::now().getTimestamp() + "_" + to_string(uh->numberOfLogEntries()) + "_log.csv";
+	#ifdef ARDUINO
+		renameFile(LogFile, filename);
+	#else
+		if(experimental::filesystem::exists(folder + LogFile))
+			experimental::filesystem::rename(folder + LogFile, folder + filename);
+		else
+			filename = "";
+	#endif
+	}
+	else if(action == "downloadFile")
+	{
+		filename = request->getArgument("file");
+	}
+	if(filename != "")
+	{
+		string content;
+		{
+			content = LogEntry::csvHeader();
+			map<string, User> users = uh->readUsers();
+			for(auto entry : uh->readLog(UINT_MAX, filename))
+			{
+				string name;
+				auto namelookup = users.find(entry.cardId);
+				if(namelookup != users.end())
+					name = namelookup->second.name;
+				content.append(entry.toCsv(name));
+			}
+		}
+		request->writeResponse(content, "200 OK", "application/octet-stream", "Content-Disposition: attachment; filename=\"" + filename + "\"");
+		return;
+	}
+	if(!experimental::filesystem::exists(folder + LogFile))
+	{
+		FileWriter writer(LogFile, FileMode::Write);
+		writer.write("");
+	}
 	WebSite::handleRequest(request);
+
 }
 
 void UserSite::fillPlaceholders()
@@ -73,10 +120,35 @@ void UserSite::handleRequest(WebRequest * request)
 
 void ConfigSite::fillPlaceholders()
 {
+	auto uh = UserHandler::getInstance();
+	map<string, string> values;
+	for(auto param : uh->getParameters())
+	{
+		values["parameter"] = param.name;
+		values["value"] = param.value;
+		setGroup("entry", values);
+	}
 }
 
 void ConfigSite::handleRequest(WebRequest * request)
 {
+	string parameter, svalue;
+	parameter = request->getArgument("parameter");
+	svalue = request->getArgument("value");
+	if(parameter != "" && svalue != "")
+	{
+		try
+		{
+			double value = stod(svalue);
+			auto uh = UserHandler::getInstance();
+			uh->setParameter(parameter, value);
+		}
+		catch(exception exc)
+		{
+			log(exc.what());
+		}
+	}
+
 	WebSite::handleRequest(request);
 }
 

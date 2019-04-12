@@ -60,7 +60,7 @@ public:
 	~WebRequest();
 
 	void processRequest();
-	void writeResponse(string content, string statusCodeAndText = "200 OK");
+	void writeResponse(string content, string statusCodeAndText = "200 OK", string contentType = "text/html; charset=ISO-8859-1", string additionalHeader = "");
 	void decode(string& text) { server->decode(text); }
 };
 

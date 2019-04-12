@@ -92,8 +92,9 @@ string TimeStamp::getDateTime()
 	return getDate() + " " + getTime();
 }
 
-bool startswith(string text, string token)
+bool startswith(const string& text, string token)
 {
+	token = token + ";";
 	size_t length = token.length();
 	for(size_t i = 0; i < length; i++)
 	{
@@ -110,7 +111,7 @@ map<string, User> UserHandler::readUsers()
 #if ARDUINO
 	SD.begin(_cspin);
 #endif
-	FileReader reader("users.csv");
+	FileReader reader(UserFile);
 
 	map<string, User> users;
 	string line;
@@ -144,7 +145,7 @@ string UserHandler::checkUser(const string & cardId)
 #if ARDUINO
 	SD.begin(_cspin);
 #endif
-	FileReader reader("users.txt");
+	FileReader reader(UserFile);
 	string line;
 	while(reader.readLine(line))
 	{
@@ -179,15 +180,15 @@ string UserHandler::checkUser(const string & cardId)
 void UserHandler::setUser(const string & cardIdInput, const string & name, bool isAllowed)
 {
 #ifdef ARDUINO
-	renameFile("users.csv", "users.csv.bak");
+	renameFile(UserFile, UserFile + ".bak");
 #else
-	string folder = "E:\\";
-	experimental::filesystem::rename(folder + "users.csv", folder + "users.csv.bak");
+	string folder = TestFolder;
+	experimental::filesystem::rename(folder + UserFile, folder + UserFile + ".bak");
 #endif
-	FileReader reader("users.csv.bak");
-	FileWriter writer("users.csv");
+	FileReader reader(UserFile + ".bak");
+	FileWriter writer(UserFile);
 
-	string cardId = writeCardId(cardIdInput);
+	string cardId = LogEntry::stdCardId(cardIdInput);
 
 	string line;
 	bool replaced = false;
@@ -208,29 +209,26 @@ void UserHandler::setUser(const string & cardIdInput, const string & name, bool 
 	}
 }
 
-string UserHandler::writeLogLine(TimeStamp & timestamp, const string & cardId, LogEntryType entry)
+string UserHandler::writeLogLine(TimeStamp & timestamp, const string & cardId, LogEntryType type)
 {
-	string line = timestamp.getTimestamp() + ";" + writeCardId(cardId) + ";" + to_string(entry) + "\n";
+	LogEntry entry(timestamp, cardId, type);
+	string line = entry.toCsv();
 	return line;
-}
-
-string UserHandler::writeCardId(const string & cardId)
-{
-	return padLeft(cardId, 20);
 }
 
 void UserHandler::writeLog(const string & cardId, LogEntryType entry)
 {
-	FileWriter writer("log.csv", FileMode::WriteAppend);
+	FileWriter writer(LogFile, FileMode::WriteAppend);
 
 	auto now = TimeStamp::now();
 	string line = writeLogLine(now, cardId, entry);
 	writer.write(line);
 }
 
-vector<LogEntry> UserHandler::readLog(int maximum)
+vector<LogEntry> UserHandler::readLog(unsigned int maximum, string filename)
 {
-	FileReader reader("log.csv", FileMode::Read);
+	if(filename == "") filename = LogFile;
+	FileReader reader(filename, FileMode::Read);
 	streamoff maxlen = (logEntryLength * maximum);
 	streamoff length = reader.length();
 	if(length < maxlen)
@@ -274,7 +272,7 @@ vector<LogEntry> UserHandler::readLog(int maximum)
 
 int UserHandler::numberOfLogEntries()
 {
-	FileReader reader("log.csv", FileMode::Read);
+	FileReader reader(LogFile, FileMode::Read);
 	streamoff length = reader.length();
 	int entries = length / logEntryLength;
 	return entries;
@@ -284,7 +282,7 @@ namespace fs = std::experimental::filesystem;
 vector<string> UserHandler::getOldLogFiles()
 {
 	vector<string> files;
-	for(auto& p : fs::directory_iterator("E:\\"))
+	for(auto& p : fs::directory_iterator(TestFolder))
 	{
 		auto path = p.path();
 		auto filename = path.filename();
@@ -293,4 +291,95 @@ vector<string> UserHandler::getOldLogFiles()
 			files.push_back(text);
 	}
 	return files;
+}
+
+void UserHandler::setParameter(const string & name, const double value)
+{
+	setParameter(name, to_string(value));
+}
+
+void UserHandler::setParameter(const string & name, const string & value = "")
+{
+#ifdef ARDUINO
+	renameFile(ConfigFile, ConfigFile + ".bak");
+#else
+	string folder = TestFolder;
+	experimental::filesystem::rename(folder + ConfigFile, folder + ConfigFile + ".bak");
+#endif
+	FileReader reader(ConfigFile + ".bak");
+	FileWriter writer(ConfigFile);
+
+	string line;
+	bool replaced = false;
+	while(reader.readLine(line))
+	{
+
+		if(startswith(line, name))
+		{
+			line = name + ";" + value;
+			replaced = true;
+		}
+		writer.write(line + "\n");
+	}
+	if(!replaced)
+	{
+		line = name + ";" + value;
+		writer.write(line + "\n");
+
+	}
+}
+
+string UserHandler::getParameter(const string & name)
+{
+	FileReader reader(ConfigFile);
+	string line;
+	while(reader.readLine(line))
+	{
+		if(startswith(line, name))
+		{
+			int seperator = line.find(';');
+			string value = line.substr(seperator + 1);
+			if(value[value.length() - 1] == '\r')
+				value.replace(value.length() - 1, 1, "");
+			return value;
+		}
+	}
+	return "";
+}
+
+double UserHandler::getParameterD(const string & name)
+{
+	return stod(getParameter(name));
+}
+
+vector<Parameter> UserHandler::getParameters()
+{
+	vector<Parameter> params;
+	FileReader reader(ConfigFile);
+	string line;
+	while(reader.readLine(line))
+	{
+		int seperator = line.find(';');
+		string value = line.substr(seperator + 1);
+		if(value[value.length() - 1] == '\r')
+			value.replace(value.length() - 1, 1, "");
+		string param = line.substr(0, seperator);
+		params.push_back(Parameter(param, value));
+	}
+	return params;
+}
+
+string LogEntry::stdCardId(const string & cardId)
+{
+	return padLeft(cardId, 20);
+}
+
+string LogEntry::csvHeader()
+{
+	return "timestamp;cardId;type[0=none,1=single,2=double];name\n";
+}
+
+string LogEntry::toCsv(string username)
+{
+	return timestamp.getTimestamp() + ";" + stdCardId(cardId) + ";" + to_string(type) + (username != "" ? ";" + username : "") + "\n";
 }

@@ -83,10 +83,13 @@
     <None Include="..\main\users.htm">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="user.csv">
+    <None Include="..\main\log.csv">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="log.csv">
+    <None Include="..\main\users.csv">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\main\config.csv">
       <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>

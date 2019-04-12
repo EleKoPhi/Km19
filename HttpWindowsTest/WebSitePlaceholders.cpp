@@ -20,9 +20,6 @@ void WebSitePlaceholder::prepare()
 string WebSitePlaceholder::generate()
 {
 	return preceding
-	#ifdef _DEBUG
-		+ "<!--" + name + "-->"
-	#endif
 		+ value;
 }
 

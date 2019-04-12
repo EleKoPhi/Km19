@@ -5,6 +5,7 @@ using namespace std;
 
 class WebSite
 {
+protected:
 	void log(string str) { printf((str + "\n").c_str()); }
 	void verbose(string str) { printf((str + "\n").c_str()); }
 

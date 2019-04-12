@@ -468,13 +468,14 @@ void WebRequest::processRequest()
 	}
 }
 
-void WebRequest::writeResponse(string content, string statusCodeAndText)
+void WebRequest::writeResponse(string content, string statusCodeAndText, string contentType, string additionalHeader)
 {
 
 	std::string header = "HTTP/1.1 " + statusCodeAndText + " " + string("\n");
 	header = header + "Server: Arduino\n";
 	header = header + "Content-Length: " + to_string(content.length()) + "\n";
-	header = header + "Content-Type: text/html; charset=ISO-8859-1\n\n";
+	header = header + "Content-Type: " + contentType + "\n";
+	header = header + additionalHeader + "\n\n";
 
 	header = header + content;
 	//verbose(">>");

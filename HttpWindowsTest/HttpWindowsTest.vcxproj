@@ -96,7 +96,8 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <PreBuildEvent>
-      <Command>copy /y "$(ProjectDir)..\main\*.htm" "$(LocalDebuggerWorkingDirectory)$(Configuration)"</Command>
+      <Command>copy /y "$(ProjectDir)..\main\*.htm" "$(LocalDebuggerWorkingDirectory)$(Configuration)"
+copy /y "$(ProjectDir)..\main\*.csv" "$(LocalDebuggerWorkingDirectory)$(Configuration)"</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -175,24 +176,25 @@
     <ClCompile Include="WebSitePlaceholders.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\main\config.csv" />
     <None Include="..\main\config.htm">
       <DeploymentContent>true</DeploymentContent>
     </None>
     <None Include="..\main\index.htm">
       <DeploymentContent>true</DeploymentContent>
     </None>
+    <None Include="..\main\log.csv" />
     <None Include="..\main\log.htm">
       <DeploymentContent>true</DeploymentContent>
     </None>
     <None Include="..\main\start.htm">
       <DeploymentContent>true</DeploymentContent>
     </None>
+    <None Include="..\main\users.csv" />
     <None Include="..\main\users.htm">
       <DeploymentContent>true</DeploymentContent>
     </None>
     <None Include="test-link.url" />
-    <None Include="user.csv" />
-    <None Include="log.csv" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
