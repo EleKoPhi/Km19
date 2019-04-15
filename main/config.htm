@@ -1,12 +1,58 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN"
+    "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
 <html>
 <head>
+	<meta http-equiv="Content-Type" content="text/html;charset=ISO-8859-1" />
 	<title></title>
 	<style type="text/css">
+		tr:nth-child(even) {
+			background: #dedede
+		}
+
+		tr:nth-child(odd) {
+			background: #FFF
+		}
+
+		th {
+			padding: 5px;
+		}
+
+		td {
+			text-align: center;
+		}
+
+		th {
+			background-color: #519fff;
+		}
 	</style>
 	<script type="text/javascript">
 	</script>
 </head>
 <body>
-	config
+	<table>
+		<thead>
+			<tr>
+				<th>parameter</th>
+				<th>value</th>
+			</tr>
+		</thead>
+		<!--[entry:]-->
+		<tr>
+			<td>
+				<!--[parameter]-->
+			</td>
+			<td>
+				<form method="get" action="config.htm">
+					<div>
+						<input name="parameter" type="hidden" value="<!--[parameter]-->" />
+						<input id="value" name="value" type="text" value="<!--[value]-->" />
+						<input type="submit" value="change" />
+					</div>
+				</form>
+			</td>
+		</tr>
+		<!--[/entry]-->
+	</table>
 </body>
 </html>
