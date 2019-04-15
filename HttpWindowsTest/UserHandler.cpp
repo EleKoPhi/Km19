@@ -209,6 +209,44 @@ void UserHandler::setUser(const string & cardIdInput, const string & name, bool 
 	}
 }
 
+void UserHandler::getUserStatistics(int & number, int & numberBlocked, int & numberUnnamed)
+{
+#if ARDUINO
+	SD.begin(_cspin);
+#endif
+	number = 0;
+	numberBlocked = 0;
+	numberUnnamed = 0;
+	FileReader reader(UserFile);
+	string line;
+	while(reader.readLine(line))
+	{
+		if(line.length() < 4)
+			continue;
+		string username;
+		string isallowed;
+		int firstsep = line.find(';');
+		int lastsep = line.find_last_of(';');
+
+		if(lastsep == firstsep)
+		{
+			isallowed = "1";
+			lastsep = line.length();
+		}
+		else
+		{
+			isallowed = line.substr(lastsep + 1);
+		}
+		++firstsep;
+		username = line.substr(firstsep, lastsep - firstsep);
+		if(username == "")
+			numberUnnamed++;
+		if(isallowed != "1")
+			numberBlocked++;
+		number++;
+	}
+}
+
 string UserHandler::writeLogLine(TimeStamp & timestamp, const string & cardId, LogEntryType type)
 {
 	LogEntry entry(timestamp, cardId, type);

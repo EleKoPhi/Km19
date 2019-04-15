@@ -154,16 +154,23 @@ void ConfigSite::handleRequest(WebRequest * request)
 
 void StartSite::fillPlaceholders()
 {
+	auto uh = UserHandler::getInstance();
+	{
+		map<string, string> values;
+		values["logentries"] = to_string(uh->numberOfLogEntries());
+		setValues(values);
+		int users, blocked, unnamed;
+		uh->getUserStatistics(users, blocked, unnamed);
+		values["users"] = to_string(users);
+		setValues(values);
+		values["blocked"] = to_string(blocked);
+		setValues(values);
+		values["unnamed"] = to_string(unnamed);
+		setValues(values);
+	}
 }
 
 void StartSite::handleRequest(WebRequest * request)
 {
-	auto users = UserHandler::getInstance();
-	string cardId = request->getArgument("cardId");
-	if(cardId.length() > 3)
-	{
-		users->writeLog(cardId);
-	}
-
 	WebSite::handleRequest(request);
 }

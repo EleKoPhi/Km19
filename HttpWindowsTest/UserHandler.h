@@ -103,6 +103,7 @@ public:
 	string checkUser(const string& cardId);
 	void setUser(const string& cardId, const string& name, bool isAllowed = true);
 	const string UnknownUser = "unkonwn";
+	void getUserStatistics(int& number, int& numberBlocked, int& numberUnnamed);
 
 	void writeLog(const string& cardId, LogEntryType entry = LogEntryType::None);
 	vector<LogEntry> readLog(unsigned int maximum = 10, string filename = "");
