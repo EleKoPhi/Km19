@@ -1,3 +1,5 @@
 *.user
 *.suo
 /main/__vm
+.vs
+Debug

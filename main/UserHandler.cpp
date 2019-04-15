@@ -15,8 +15,9 @@ UserHandler::UserHandler(int chipSelect, int slaveSelect, int rstPin) : _nfcRead
 
 String UserHandler::CheckIfExists(String cardID)
 {
+  return "Philipp";
   SD.begin(_cspin);
-  _userData = SD.open("USERTX~1.TXT", FILE_READ);
+  _userData = SD.open("user.csv", FILE_READ);
 
   char cardBuf[cardID.length() + 1];
   char UserFiled[_userData.available()];
@@ -211,4 +212,3 @@ String UserHandler::GetLastUser()
 
 	Serial.println(log);
 }
-
