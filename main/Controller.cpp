@@ -63,13 +63,13 @@ char Controller::StateTransitions()
 
 	else if(_currentStatus == WaitForInput && (_userHandler.ReadUserInput() == 'l'))
 	{
-		_userHandler.WriteToLog(Einfach, _currentUser.c_str(), _additionalUser.c_str(), _currentUserId.c_str(), _additionalUserId.c_str());
+		_userHandler.writeLog(Einfach, _currentUser.c_str(), _additionalUser.c_str(), _currentUserId.c_str(), _additionalUserId.c_str());
 		return StateBegin(Einfach);
 	}
 
 	else if(_currentStatus == WaitForSplitBooking && (_userHandler.ReadUserInput() == 'l' || _userHandler.ReadUserInput() == 'r'))
 	{
-		_userHandler.WriteToLog(Doppelt, _currentUser.c_str(), _additionalUser.c_str(), _currentUserId.c_str(), _additionalUserId.c_str());
+		_userHandler.writeLog(Doppelt, _currentUser.c_str(), _additionalUser.c_str(), _currentUserId.c_str(), _additionalUserId.c_str());
 		return StateBegin(Doppelt);
 	}
 
@@ -118,7 +118,7 @@ void Controller::States(char Status)
 		if(_userHandler.HasCardToRead())
 		{
 			_currentUserId = _userHandler.GetCardId();
-			_currentUser = _userHandler.CheckIfExists(_currentUserId.c_str());
+			_currentUser = _userHandler.checkUser(_currentUserId.c_str());
 		}
 	}
 
@@ -153,7 +153,7 @@ void Controller::States(char Status)
 		if(_userHandler.HasCardToRead())
 		{
 			_additionalUserId = _userHandler.GetCardId();
-			_additionalUser = _userHandler.CheckIfExists(_currentUserId.c_str());
+			_additionalUser = _userHandler.checkUser(_currentUserId.c_str());
 
 			if(_currentUser == String("Unknow user"))
 			{

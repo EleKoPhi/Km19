@@ -1,3 +1,4 @@
+#include "stdafx.h"
 #include "Arduino.h"
 #include "UserHandler.h"
 #include "defines.h"
@@ -5,210 +6,445 @@
 #include <SD.h>
 #include <MFRC522.h>
 
+#include "UserHandler.h"
 
-UserHandler::UserHandler(int chipSelect, int slaveSelect, int rstPin) : _nfcReader(slaveSelect, rstPin)
+#include <ctime> 
+#include "FileIO.h"
+#include <filesystem>
+
+UserHandler::UserHandler()
 {
-  _cspin = chipSelect;
-  SdStatus = false;
-  deboundeStatus = false;
-}
-
-String UserHandler::CheckIfExists(String cardID)
-{
-  return "Philipp";
-  SD.begin(_cspin);
-  _userData = SD.open("user.csv", FILE_READ);
-
-  char cardBuf[cardID.length() + 1];
-  char UserFiled[_userData.available()];
-  int idIterator = 0;
-  int filedIterator = 0;
-
-
-  cardID.toCharArray(cardBuf, sizeof(cardBuf));
-  _userData.read(UserFiled, sizeof(UserFiled));
-
-  _userData.close();
-
-  bool compareFlag = true;
-
-  for (filedIterator = 0; filedIterator <= sizeof(UserFiled) - 1; filedIterator++)
-  {
-
-    if (UserFiled[filedIterator] == ':') compareFlag = false;
-
-    if (UserFiled[filedIterator] == '\n')
-    {
-      compareFlag = true;
-      idIterator = 0;
-      continue;
-    }
-
-    if (compareFlag)
-    {
-
-      if (UserFiled[filedIterator] != cardBuf[idIterator])
-      {
-
-        compareFlag = false;
-        continue;
-      }
-
-      if (idIterator + 1 == sizeof(cardBuf) - 1 & UserFiled[filedIterator + 1] == ':')
-      {
-
-        int i = 0;
-        String userName;
-        while (UserFiled[filedIterator + i + 1] != '\n')
-        {
-		  if(String(UserFiled[filedIterator + i + 2]) == "\n") break;
-          userName += String(UserFiled[filedIterator + i + 2]);
-          i++;
-        }
-        _userData.close();
-        return userName;
-      }
-    }
-    idIterator++;
-  }
-
-  _userData.close();
-  return String("Unknow user");
-}
-
-void UserHandler::StartUp()
-{
-  SPI.begin();
-  RtcStatus = _rtc.begin();
-  _nfcReader.PCD_Init();
-  SdStatus = SD.begin(_cspin);
-  _nfcReader.PCD_Init();
-  NfcStatus = _nfcReader.PCD_PerformSelfTest();
-  _nfcReader.PCD_Init();
-  pinMode(taster_LINKS_pin, INPUT);
-  pinMode(taster_RECHTS_pin, INPUT);
 }
 
 
-char UserHandler::ReadUserInput()
+UserHandler::~UserHandler()
 {
-	/*if(!digitalRead(taster_LINKS_pin) && !digitalRead(taster_RECHTS_pin))
+}
+
+UserHandler* UserHandler::getInstance()
+{
+	static UserHandler instance;
+	return &instance;
+}
+#ifndef ARDUINO
+TimeStamp TimeStamp::now()
+{
+	std::time_t t = std::time(0);   // get time now
+	std::tm* now = std::localtime(&t);
+	return TimeStamp(now);
+}
+
+TimeStamp::TimeStamp(tm * timestamp)
+	: year(timestamp->tm_year + 1900)
+	, month(timestamp->tm_mon + 1)
+	, day(timestamp->tm_mday)
+	, hours(timestamp->tm_hour)
+	, minutes(timestamp->tm_min)
+	, seconds(timestamp->tm_sec)
+
+{
+}
+#else
+TimeStamp TimeStamp::now()
+{
+	_rtc.begin();
+	DateTime now = _rtc.now();
+	_nfcReader.PCD_Init();  // Shit :O
+	return TimeStamp(now);
+}
+
+TimeStamp::TimeStamp(DateTime& tmtimestamp)
+	: year(timestamp.year())
+	, month(timestamp.month())
+	, day(timestamp.day())
+	, hours(timestamp.hour())
+	, minutes(timestamp.minute())
+	, seconds(timestamp.second())
+{
+}
+
+#endif
+
+string padLeft(string text, int length, char padding)
+{
+	while(text.length() < length) text = padding + text;
+	return text;
+}
+
+string padLeft(int value, int length, char padding)
+{
+	string text = to_string(value);
+	return padLeft(text, length, padding);
+}
+
+TimeStamp TimeStamp::parse(string timestamp)
+{
+	string year, month, day, hours, minutes, seconds;
+	year = timestamp.substr(0, 4);
+	month = timestamp.substr(5, 2);
+	day = timestamp.substr(8, 2);
+	hours = timestamp.substr(11, 2);
+	minutes = timestamp.substr(14, 2);
+	seconds = timestamp.substr(17, 2);
+	return TimeStamp(stoi(year), stoi(month), stoi(day), stoi(hours), stoi(minutes), stoi(seconds));
+}
+
+TimeStamp::TimeStamp(int year, int month, int day, int hours, int minutes, int seconds)
+	: year(year)
+	, month(month)
+	, day(day)
+	, hours(hours)
+	, minutes(minutes)
+	, seconds(seconds)
+{
+}
+
+string TimeStamp::getTimestamp()
+{
+	return padLeft(year, 4) + "-" + padLeft(month) + "-" + padLeft(day) + "_" + padLeft(hours) + "-" + padLeft(minutes) + "-" + padLeft(seconds);
+}
+
+string TimeStamp::getDate()
+{
+	return padLeft(year, 4) + "-" + padLeft(month) + "-" + padLeft(day);
+}
+
+string TimeStamp::getTime()
+{
+	return padLeft(hours) + ":" + padLeft(minutes) + ":" + padLeft(seconds);
+}
+
+string TimeStamp::getDateTime()
+{
+	return getDate() + " " + getTime();
+}
+
+bool startswith(const string& text, string token)
+{
+	token = token + ";";
+	size_t length = token.length();
+	for(size_t i = 0; i < length; i++)
 	{
-		deboundeStatus = false;
-	}*/
-
-	if(digitalRead(taster_LINKS_pin) /*&& !deboundeStatus*/)
-	{
-		//deboundeStatus = true;
-		Serial.println("l");
-		return 'l';
+		if(text[i] != token[i])
+			return false;
 	}
-	if(digitalRead(taster_RECHTS_pin)/* && !deboundeStatus*/)
-	{
-		//deboundeStatus = true;
-		Serial.println("r");
-		return 'r';
-	}
-
-  return 'n';
+	return true;
 }
 
-bool UserHandler::HasCardToRead()
+
+
+std::map<string, User> UserHandler::readUsers()
 {
-  if (!_nfcReader.PICC_IsNewCardPresent())
-  {
-    return false;
-  }
-  else
-  {
-    return true;
-  }
-}
-
-String UserHandler::GetCardId()
-{
-  long code = 0;
-
-  if (_nfcReader.PICC_ReadCardSerial() )
-  {
-    for (byte i = 0; i < _nfcReader.uid.size; i++)
-    {
-      code = ((code + _nfcReader.uid.uidByte[i]) * 10);
-    }
-  }
-  return String(code, DEC);
-}
-
-String UserHandler::getTimestamp()
-{
-  String Moment = "";
-  _rtc.begin();
-  DateTime now = _rtc.now();
-  _nfcReader.PCD_Init();  // Shit :O
-  Moment = String(now.year(), DEC) + "-";
-  if(now.month() < 10)Moment += "0";
-  Moment += String(now.month(), DEC) + "-";
-  if(now.day() < 10)Moment += "0";
-  Moment += String(now.day(), DEC) + " ";
-  if(now.hour() < 10)Moment += "0";
-  Moment += String(now.hour(), DEC) + ":";
-  if(now.minute() < 10)Moment += "0";
-  Moment += String(now.minute(), DEC) + " ";
-
-  return Moment;
-}
-
-void UserHandler::WriteToLog(char state, String user1, String user2, String userId1, String userId2)
-{
-
-  this->_logFile = SD.open("UserLog.txt", FILE_WRITE);
-
-  if (this->_logFile)
-  {
-    if (state == Einfach)
-    {
-	  String logLine = getTimestamp() + ";" + user1 + ";" + userId1 + ";1";
-      this->_logFile.println(logLine);
-    }
-
-    if (state == Doppelt)
-    {
-      if (user2.c_str() == "")
-      {
-		String logLine = getTimestamp() + ";" + user1 + ";" + userId1 + ";2";
-        this->_logFile.println(logLine);
-      }
-      else
-      {
-		String logLine1 = getTimestamp() + ";" + user1 + ";" + userId1 + ";1";
-		String logLine2 = getTimestamp() + ";" + user2 + ";" + userId2 + ";1";
-        this->_logFile.println(logLine1);
-        this->_logFile.println(logLine2);
-      }
-    }
-  }
-  else
-  {
-    Serial.println("Cant write to card");
-    while (true) {}
-  }
-
-  this->_logFile.close();
-}
-
-String UserHandler::GetLastUser()
-{
+#if ARDUINO
 	SD.begin(_cspin);
-	_logFile = SD.open("userLog.txt", FILE_READ);
+#endif
+	FileReader reader(UserFile);
 
-	String log = "";
-
-	while(_logFile.read() != -1)
+	std::map<string, User> users;
+	string line;
+	while(reader.readLine(line))
 	{
-		log += String(_logFile.read());
+		User user;
+		int firstsep = line.find(';');
+		int lastsep = line.find_last_of(';');
+
+		if(lastsep == firstsep)
+		{
+			user.isAllowed = "1";
+			lastsep = line.length();
+		}
+		else
+		{
+			user.isAllowed = line.substr(lastsep + 1) == "1";
+		}
+		++firstsep;
+		user.cardId = line.substr(0, firstsep - 1);
+		user.name = line.substr(firstsep, lastsep - firstsep);
+		users[user.cardId] = user;
+		log("read user: " + user.toString());
 	}
 
-	_logFile.close();
+	return users;
+}
 
-	Serial.println(log);
+string UserHandler::checkUser(const string & cardId)
+{
+#if ARDUINO
+	SD.begin(_cspin);
+#endif
+	FileReader reader(UserFile);
+	string line;
+	while(reader.readLine(line))
+	{
+		if(startswith(line, cardId))
+		{
+			string username;
+			string isallowed;
+			int firstsep = line.find(';');
+			int lastsep = line.find_last_of(';');
+
+			if(lastsep == firstsep)
+			{
+				isallowed = "1";
+				lastsep = line.length();
+			}
+			else
+			{
+				isallowed = line.substr(lastsep + 1);
+			}
+			++firstsep;
+			username = line.substr(firstsep, lastsep - firstsep);
+
+			if(isallowed == "1")
+				return username;
+			else
+				return UserHandler::UnknownUser;
+		}
+	}
+	return UserHandler::UnknownUser;
+}
+
+void UserHandler::setUser(const string & cardIdInput, const string & name, bool isAllowed)
+{
+#ifdef ARDUINO
+	renameFile(UserFile, UserFile + ".bak");
+#else
+	string folder = TestFolder;
+	experimental::filesystem::rename(folder + UserFile, folder + UserFile + ".bak");
+#endif
+	FileReader reader(UserFile + ".bak");
+	FileWriter writer(UserFile);
+
+	string cardId = LogEntry::stdCardId(cardIdInput);
+
+	string line;
+	bool replaced = false;
+	while(reader.readLine(line))
+	{
+
+		if(startswith(line, cardId))
+		{
+			line = cardId + ";" + name + ";" + (isAllowed ? "1" : "0");
+			replaced = true;
+		}
+		writer.write(line + "\n");
+	}
+	if(!replaced)
+	{
+		line = cardId + ";" + name + ";" + (isAllowed ? "1" : "0");
+		writer.write(line + "\n");
+	}
+}
+
+void UserHandler::getUserStatistics(int & number, int & numberBlocked, int & numberUnnamed)
+{
+#if ARDUINO
+	SD.begin(_cspin);
+#endif
+	number = 0;
+	numberBlocked = 0;
+	numberUnnamed = 0;
+	FileReader reader(UserFile);
+	string line;
+	while(reader.readLine(line))
+	{
+		if(line.length() < 4)
+			continue;
+		string username;
+		string isallowed;
+		int firstsep = line.find(';');
+		int lastsep = line.find_last_of(';');
+
+		if(lastsep == firstsep)
+		{
+			isallowed = "1";
+			lastsep = line.length();
+		}
+		else
+		{
+			isallowed = line.substr(lastsep + 1);
+		}
+		++firstsep;
+		username = line.substr(firstsep, lastsep - firstsep);
+		if(username == "")
+			numberUnnamed++;
+		if(isallowed != "1")
+			numberBlocked++;
+		number++;
+	}
+}
+
+string UserHandler::writeLogLine(TimeStamp & timestamp, const string & cardId, LogEntryType type)
+{
+	LogEntry entry(timestamp, cardId, type);
+	string line = entry.toCsv();
+	return line;
+}
+
+void UserHandler::writeLog(const string & cardId, LogEntryType entry)
+{
+	FileWriter writer(LogFile, FileMode::WriteAppend);
+
+	auto now = TimeStamp::now();
+	string line = writeLogLine(now, cardId, entry);
+	writer.write(line);
+}
+
+vector<LogEntry> UserHandler::readLog(unsigned int maximum, string filename)
+{
+	if(filename == "") filename = LogFile;
+	FileReader reader(filename, FileMode::Read);
+	streamoff maxlen = (logEntryLength * maximum);
+	streamoff length = reader.length();
+	if(length < maxlen)
+		reader.seek(reader.start());
+	else
+		reader.seek(length - maxlen, fstream::beg);
+	string line;
+	vector<LogEntry> entries;
+	for(int lines = 0; lines < maximum && reader.readLine(line); lines++)
+	{
+		entries.push_back(LogEntry());
+		LogEntry* entry = &entries[lines];
+
+		string cardid;
+		string type;
+		string timestamp;
+		int firstsep = line.find(';');
+		int lastsep = line.find_last_of(';');
+
+		if(lastsep == firstsep)
+		{
+			type = "1";
+			lastsep = line.length();
+		}
+		else
+		{
+			type = line.substr(lastsep + 1);
+			if(type[type.length() - 1] == '\r')
+				type.replace(type.length() - 1, 1, "");
+		}
+		++firstsep;
+		cardid = line.substr(firstsep, lastsep - firstsep);
+		timestamp = line.substr(0, firstsep);
+
+		entry->timestamp = TimeStamp::parse(timestamp);
+		entry->cardId = cardid;
+		entry->type = (LogEntryType)stoi(type);
+	}
+	return entries;
+}
+
+int UserHandler::numberOfLogEntries()
+{
+	FileReader reader(LogFile, FileMode::Read);
+	streamoff length = reader.length();
+	int entries = length / logEntryLength;
+	return entries;
+}
+
+namespace fs = std::experimental::filesystem;
+vector<string> UserHandler::getOldLogFiles()
+{
+	vector<string> files;
+	for(auto& p : fs::directory_iterator(TestFolder))
+	{
+		auto path = p.path();
+		auto filename = path.filename();
+		auto text = filename.string();
+		if(text.find("_log.csv") != string::npos)
+			files.push_back(text);
+	}
+	return files;
+}
+
+void UserHandler::setParameter(const string & name, const double value)
+{
+	setParameter(name, to_string(value));
+}
+
+void UserHandler::setParameter(const string & name, const string & value = "")
+{
+#ifdef ARDUINO
+	renameFile(ConfigFile, ConfigFile + ".bak");
+#else
+	string folder = TestFolder;
+	experimental::filesystem::rename(folder + ConfigFile, folder + ConfigFile + ".bak");
+#endif
+	FileReader reader(ConfigFile + ".bak");
+	FileWriter writer(ConfigFile);
+
+	string line;
+	bool replaced = false;
+	while(reader.readLine(line))
+	{
+
+		if(startswith(line, name))
+		{
+			line = name + ";" + value;
+			replaced = true;
+		}
+		writer.write(line + "\n");
+	}
+	if(!replaced)
+	{
+		line = name + ";" + value;
+		writer.write(line + "\n");
+
+	}
+}
+
+string UserHandler::getParameter(const string & name)
+{
+	FileReader reader(ConfigFile);
+	string line;
+	while(reader.readLine(line))
+	{
+		if(startswith(line, name))
+		{
+			int seperator = line.find(';');
+			string value = line.substr(seperator + 1);
+			if(value[value.length() - 1] == '\r')
+				value.replace(value.length() - 1, 1, "");
+			return value;
+		}
+	}
+	return "";
+}
+
+double UserHandler::getParameterD(const string & name)
+{
+	return stod(getParameter(name));
+}
+
+vector<Parameter> UserHandler::getParameters()
+{
+	vector<Parameter> params;
+	FileReader reader(ConfigFile);
+	string line;
+	while(reader.readLine(line))
+	{
+		int seperator = line.find(';');
+		string value = line.substr(seperator + 1);
+		if(value[value.length() - 1] == '\r')
+			value.replace(value.length() - 1, 1, "");
+		string param = line.substr(0, seperator);
+		params.push_back(Parameter(param, value));
+	}
+	return params;
+}
+
+string LogEntry::stdCardId(const string & cardId)
+{
+	return padLeft(cardId, 20);
+}
+
+string LogEntry::csvHeader()
+{
+	return "timestamp;cardId;type[0=none,1=single,2=double];name\n";
+}
+
+string LogEntry::toCsv(string username)
+{
+	return timestamp.getTimestamp() + ";" + stdCardId(cardId) + ";" + to_string(type) + (username != "" ? ";" + username : "") + "\n";
 }
