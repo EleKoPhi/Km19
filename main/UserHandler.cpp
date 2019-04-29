@@ -1,21 +1,33 @@
 #include "stdafx.h"
-#include "Arduino.h"
+#include "Helper.h"
 #include "UserHandler.h"
 #include "defines.h"
+
+
+#include "FileIO.h"
+#ifndef ARDUINO
+#include <ctime> 
+#include <filesystem>
+#else
 #include <SPI.h>
 #include <SD.h>
 #include <MFRC522.h>
+#endif
 
-#include "UserHandler.h"
-
-#include <ctime> 
-#include "FileIO.h"
-#include <filesystem>
+const string UserHandler::UnknownUser = "unkonwn";
 
 UserHandler::UserHandler()
 {
+	SPI.begin();
+	RtcStatus = _rtc.begin();
+	_nfcReader.PCD_Init();
+	SdStatus = SD.begin(_cspin);
+	_nfcReader.PCD_Init();
+	NfcStatus = _nfcReader.PCD_PerformSelfTest();
+	_nfcReader.PCD_Init();
+	pinMode(taster_LINKS_pin, INPUT);
+	pinMode(taster_RECHTS_pin, INPUT);
 }
-
 
 UserHandler::~UserHandler()
 {

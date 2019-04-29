@@ -1,7 +1,7 @@
 #ifndef CONTROLLER_h
 #define CONTROLLER_h
 
-#include "Arduino.h"
+#include "Helper.h"
 #include "UserHandler.h"
 #include "Drawer.h"
 #include "WebServer.h"
@@ -22,11 +22,9 @@ class Controller
 
   String GetCurrentUser();
   void SetCurrentUser(String user);
-  
-  
+    
   private:
   Drawer _drawer;
-  UserHandler _userHandler;
   WebServer _wifi;
   char _currentStatus;
   

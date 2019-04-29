@@ -12,8 +12,8 @@ Controller* MillController;
 
 void setup()
 {
-  MillController = new Controller(sd_CS_pin, nfc_SS_pin, nfc_RS_pin,display_CLK_pin, display_DATA_pin);
-  Serial.begin(9600);
+	MillController = new Controller(sd_CS_pin, nfc_SS_pin, nfc_RS_pin, display_CLK_pin, display_DATA_pin);
+  //Serial.begin(9600);
   //while (!Serial);
   MillController->Begin();
 }
@@ -21,5 +21,5 @@ void setup()
 void loop()
 {
   MillController->UpDateTime();
-  MillController->States(MillController->StateTransitions()); 
+  MillController->States(MillController->StateTransitions());
 }

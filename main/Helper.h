@@ -3,6 +3,8 @@
 #define Helper_h
 
 #include "Arduino.h"
+#undef min
+#undef max
 
 #include <string>
 

@@ -1,15 +1,15 @@
-#include "Arduino.h"
+#include "Helper.h"
 #include "UserHandler.h"
 #include "Drawer.h"
 #include "Controller.h"
 #include "defines.h"
 
-Controller::Controller(int chipSelect, int slaveSelect, int rstPin, int clk, int data) : _drawer(clk, data), _userHandler(chipSelect, slaveSelect, rstPin)/* _wifi() */ {}
+Controller::Controller(int chipSelect, int slaveSelect, int rstPin, int clk, int data) : _drawer(clk, data) {}
 
 void Controller::Begin()
 {
-	_userHandler.StartUp();
-	_drawer.DrawErr(_userHandler.SdStatus, _userHandler.NfcStatus, _userHandler.RtcStatus);
+	auto _userHandler = UserHandler::getInstance();
+	_drawer.DrawErr(_userHandler->SdStatus, _userHandler.NfcStatus, _userHandler.RtcStatus);
 	_drawer.DrawMain();
 	this->Reset();
 }
@@ -26,27 +26,28 @@ char Controller::GetCurrentStatus()
 
 char Controller::StateTransitions()
 {
+	char newStatus = _userHandler.ReadUserInput();
 	if((_currentStatus == WaitForCard || _currentStatus == LastUserState || _currentStatus == KaffeeKingState || _currentStatus == CurrentDrawsState) && _userHandler.HasCardToRead())
 	{
 		return StateBegin(ReadCard);
 	}
 
-	else if((_currentStatus == WaitForCard && _userHandler.ReadUserInput() == 'l') || (_currentStatus == CurrentDrawsState && _userHandler.ReadUserInput() == 'r'))
+	else if((_currentStatus == WaitForCard && newStatus == 'l') || (_currentStatus == CurrentDrawsState && newStatus == 'r'))
 	{
 		return StateBegin(LastUserState);
 	}
 
-	else if((_currentStatus == LastUserState && _userHandler.ReadUserInput() == 'l') || (_currentStatus == KaffeeKingState && _userHandler.ReadUserInput() == 'r'))
+	else if((_currentStatus == LastUserState && newStatus == 'l') || (_currentStatus == KaffeeKingState && newStatus == 'r'))
 	{
 		return StateBegin(CurrentDrawsState);
 	}
 
-	else if((_currentStatus == CurrentDrawsState && _userHandler.ReadUserInput() == 'l') || (_currentStatus == WaitForCard && _userHandler.ReadUserInput() == 'r'))
+	else if((_currentStatus == CurrentDrawsState && newStatus == 'l') || (_currentStatus == WaitForCard && newStatus == 'r'))
 	{
 		return StateBegin(KaffeeKingState);
 	}
 
-	else if((_currentStatus == KaffeeKingState && _userHandler.ReadUserInput() == 'l') || (_currentStatus == LastUserState && _userHandler.ReadUserInput() == 'r'))
+	else if((_currentStatus == KaffeeKingState && newStatus == 'l') || (_currentStatus == LastUserState && newStatus == 'r'))
 	{
 		return StateBegin(WaitForCard);
 	}
@@ -56,24 +57,24 @@ char Controller::StateTransitions()
 		return StateBegin(UnknownUserState);
 	}
 
-	else if(_currentStatus == ReadCard && _currentUser != UserHandler::UnknownUser && _currentUser != String(""))
+	else if(_currentStatus == ReadCard && _currentUser != UserHandler::UnknownUser && _currentUser != "")
 	{
 		return StateBegin(WaitForInput);
 	}
 
-	else if(_currentStatus == WaitForInput && (_userHandler.ReadUserInput() == 'l'))
+	else if(_currentStatus == WaitForInput && (newStatus == 'l'))
 	{
-		_userHandler.writeLog(Einfach, _currentUser.c_str(), _additionalUser.c_str(), _currentUserId.c_str(), _additionalUserId.c_str());
+		_userHandler.WriteToLog(Einfach, _currentUser.c_str(), _additionalUser.c_str(), _currentUserId.c_str(), _additionalUserId.c_str());
 		return StateBegin(Einfach);
 	}
 
-	else if(_currentStatus == WaitForSplitBooking && (_userHandler.ReadUserInput() == 'l' || _userHandler.ReadUserInput() == 'r'))
+	else if(_currentStatus == WaitForSplitBooking && (newStatus == 'l' || newStatus == 'r'))
 	{
-		_userHandler.writeLog(Doppelt, _currentUser.c_str(), _additionalUser.c_str(), _currentUserId.c_str(), _additionalUserId.c_str());
+		_userHandler.WriteToLog(Doppelt, _currentUser.c_str(), _additionalUser.c_str(), _currentUserId.c_str(), _additionalUserId.c_str());
 		return StateBegin(Doppelt);
 	}
 
-	else if(_currentStatus == WaitForInput && _userHandler.ReadUserInput() == 'r')
+	else if(_currentStatus == WaitForInput && newStatus == 'r')
 	{
 		return StateBegin(WaitForSplitBooking);
 	}

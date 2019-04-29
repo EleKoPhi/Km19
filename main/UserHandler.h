@@ -3,7 +3,7 @@
 #define UserHandler_h
 
 #ifdef ARDUINO
-#include "Arduino.h"
+#include "Helper.h"
 #include <SD.h>
 #include <SPI.h>
 #include <MFRC522.h>
@@ -11,7 +11,6 @@
 #include <RTClib.h>
 #endif
 
-#include "Helper.h"
 #include <string>
 #include <vector>
 #include <map>
@@ -119,7 +118,7 @@ class UserHandler
 	MFRC522 _nfcReader;
 	File _userData;
 	File _logFile;
-	RTC_DS3231 _rtc;
+	DS3231 _rtc;
 	int _cspin;
 
 	string writeLogLine(TimeStamp& timestamp, const string& cardId, LogEntryType entry);
@@ -130,7 +129,7 @@ public:
 	std::map<string, User> readUsers();
 	string checkUser(const string& cardId);
 	void setUser(const string& cardId, const string& name, bool isAllowed = true);
-	const string UnknownUser = "unkonwn";
+	static const string UnknownUser;
 	void getUserStatistics(int& number, int& numberBlocked, int& numberUnnamed);
 
 	void writeLog(const string& cardId, LogEntryType entry = LogEntryType::None);
@@ -144,6 +143,10 @@ public:
 	string getParameter(const string& name);
 	double getParameterD(const string& name);
 	vector<Parameter> getParameters();
+
+	bool SdStatus;
+	bool NfcStatus;
+	bool RtcStatus;
 };
 
 #endif
