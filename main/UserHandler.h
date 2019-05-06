@@ -115,11 +115,8 @@ class UserHandler
 		Serial.println(str.c_str());
 	#endif
 	}
-	MFRC522 _nfcReader;
 	File _userData;
 	File _logFile;
-	DS3231 _rtc;
-	int _cspin;
 
 	string writeLogLine(TimeStamp& timestamp, const string& cardId, LogEntryType entry);
 public:
@@ -127,6 +124,7 @@ public:
 	static UserHandler* getInstance();
 
 	std::map<string, User> readUsers();
+	string readCurrentCardId();
 	string checkUser(const string& cardId);
 	void setUser(const string& cardId, const string& name, bool isAllowed = true);
 	static const string UnknownUser;
@@ -144,9 +142,31 @@ public:
 	double getParameterD(const string& name);
 	vector<Parameter> getParameters();
 
+	MillStates readButtonChoice();
+	bool isCardAvailable();
+
 	bool SdStatus;
 	bool NfcStatus;
 	bool RtcStatus;
+	static DS3231* realTimeClock()
+	{
+		static DS3231 rtc;
+		getInstance()->RtcStatus = rtc.begin();
+		return &rtc;
+	}
+	static void sdCard()
+	{
+		getInstance()->SdStatus = SD.begin(PinConfiguration::sd_CS_pin);
+	}
+	static MFRC522* nfcReader()
+	{
+		static MFRC522 nfc;
+		nfc.PCD_Init();
+		getInstance()->NfcStatus = nfc.PCD_PerformSelfTest();
+		nfc.PCD_Init();
+		return &nfc;
+	}
+
 };
 
 #endif

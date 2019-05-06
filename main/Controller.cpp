@@ -2,86 +2,86 @@
 #include "UserHandler.h"
 #include "Drawer.h"
 #include "Controller.h"
-#include "defines.h"
 
 Controller::Controller(int chipSelect, int slaveSelect, int rstPin, int clk, int data) : _drawer(clk, data) {}
 
 void Controller::Begin()
 {
-	auto _userHandler = UserHandler::getInstance();
-	_drawer.DrawErr(_userHandler->SdStatus, _userHandler.NfcStatus, _userHandler.RtcStatus);
+	auto users = UserHandler::getInstance();
+	_drawer.DrawErr(users->SdStatus, users->NfcStatus, users->RtcStatus);
 	_drawer.DrawMain();
 	this->Reset();
 }
 
-void Controller::PutCurrentStatus(char stat)
+void Controller::setCurrentStatus(MillStates stat)
 {
 	_currentStatus = stat;
 }
 
-char Controller::GetCurrentStatus()
+MillStates Controller::getCurrentStatus()
 {
 	return _currentStatus;
 }
 
-char Controller::StateTransitions()
+MillStates Controller::updateStateTransitions()
 {
-	char newStatus = _userHandler.ReadUserInput();
-	if((_currentStatus == WaitForCard || _currentStatus == LastUserState || _currentStatus == KaffeeKingState || _currentStatus == CurrentDrawsState) && _userHandler.HasCardToRead())
+	auto users = UserHandler::getInstance();
+	MillStates newStatus = users->readButtonChoice();
+	if((_currentStatus == WaitForCard || _currentStatus == LastUserState || _currentStatus == KaffeeKingState || _currentStatus == CurrentDrawsState) && users->isCardAvailable())
 	{
-		return StateBegin(ReadCard);
+		return beginState(ReadCard);
 	}
 
-	else if((_currentStatus == WaitForCard && newStatus == 'l') || (_currentStatus == CurrentDrawsState && newStatus == 'r'))
+	else if((_currentStatus == WaitForCard && newStatus == MillStates::Einfach) || (_currentStatus == CurrentDrawsState && newStatus == MillStates::Doppelt))
 	{
-		return StateBegin(LastUserState);
+		return beginState(LastUserState);
 	}
 
-	else if((_currentStatus == LastUserState && newStatus == 'l') || (_currentStatus == KaffeeKingState && newStatus == 'r'))
+	else if((_currentStatus == LastUserState && newStatus == MillStates::Einfach) || (_currentStatus == KaffeeKingState && newStatus == MillStates::Doppelt))
 	{
-		return StateBegin(CurrentDrawsState);
+		return beginState(CurrentDrawsState);
 	}
 
-	else if((_currentStatus == CurrentDrawsState && newStatus == 'l') || (_currentStatus == WaitForCard && newStatus == 'r'))
+	else if((_currentStatus == CurrentDrawsState && newStatus == MillStates::Einfach) || (_currentStatus == WaitForCard && newStatus == MillStates::Doppelt))
 	{
-		return StateBegin(KaffeeKingState);
+		return beginState(KaffeeKingState);
 	}
 
-	else if((_currentStatus == KaffeeKingState && newStatus == 'l') || (_currentStatus == LastUserState && newStatus == 'r'))
+	else if((_currentStatus == KaffeeKingState && newStatus == MillStates::Einfach) || (_currentStatus == LastUserState && newStatus == MillStates::Doppelt))
 	{
-		return StateBegin(WaitForCard);
+		return beginState(WaitForCard);
 	}
 
 	else if(_currentStatus == ReadCard && _currentUser == UserHandler::UnknownUser)
 	{
-		return StateBegin(UnknownUserState);
+		return beginState(UnknownUserState);
 	}
 
 	else if(_currentStatus == ReadCard && _currentUser != UserHandler::UnknownUser && _currentUser != "")
 	{
-		return StateBegin(WaitForInput);
+		return beginState(WaitForInput);
 	}
 
-	else if(_currentStatus == WaitForInput && (newStatus == 'l'))
+	else if(_currentStatus == WaitForInput && (newStatus == MillStates::Einfach))
 	{
-		_userHandler.WriteToLog(Einfach, _currentUser.c_str(), _additionalUser.c_str(), _currentUserId.c_str(), _additionalUserId.c_str());
-		return StateBegin(Einfach);
+		users->writeLog(_currentUserId, LogEntryType::Single);
+		return beginState(Einfach);
 	}
 
-	else if(_currentStatus == WaitForSplitBooking && (newStatus == 'l' || newStatus == 'r'))
+	else if(_currentStatus == WaitForSplitBooking && (newStatus == MillStates::Einfach || newStatus == MillStates::Doppelt))
 	{
-		_userHandler.WriteToLog(Doppelt, _currentUser.c_str(), _additionalUser.c_str(), _currentUserId.c_str(), _additionalUserId.c_str());
-		return StateBegin(Doppelt);
+		users->writeLog(_currentUserId, LogEntryType::Double);
+		return beginState(Doppelt);
 	}
 
-	else if(_currentStatus == WaitForInput && newStatus == 'r')
+	else if(_currentStatus == WaitForInput && newStatus == MillStates::Doppelt)
 	{
-		return StateBegin(WaitForSplitBooking);
+		return beginState(WaitForSplitBooking);
 	}
 
-	else if(_currentStatus == WaitForSplitBooking && _userHandler.HasCardToRead())
+	else if(_currentStatus == WaitForSplitBooking && users->isCardAvailable())
 	{
-		return StateBegin(IdentSecondPayer);
+		return beginState(IdentSecondPayer);
 	}
 
 	else
@@ -101,14 +101,14 @@ bool Controller::TimeOut(int time)
 	return false;
 }
 
-void Controller::UpDateTime()
+unsigned long Controller::updateDeltaTime()
 {
 	_deltaTime = millis() - _startTime;
 }
 
-void Controller::States(char Status)
+void Controller::States(MillStates Status)
 {
-
+	auto users = UserHandler::getInstance();
 	if(Status == WaitForCard)
 	{
 		_drawer.DrawMain();
@@ -116,16 +116,16 @@ void Controller::States(char Status)
 
 	if(Status == ReadCard)
 	{
-		if(_userHandler.HasCardToRead())
+		if(users->isCardAvailable())
 		{
-			_currentUserId = _userHandler.GetCardId();
-			_currentUser = _userHandler.checkUser(_currentUserId.c_str());
+			_currentUserId = users->readCurrentCardId();
+			_currentUser = users->checkUser(_currentUserId);
 		}
 	}
 
 	if(Status == WaitForInput)
 	{
-		this->_drawer.DrawDes(String(_currentUser));
+		this->_drawer.DrawDes(_currentUser);
 		this->TimeOut(10000);
 	}
 
@@ -151,18 +151,18 @@ void Controller::States(char Status)
 	{
 		this->TimeOut(10000);
 
-		if(_userHandler.HasCardToRead())
+		if(users->isCardAvailable())
 		{
-			_additionalUserId = _userHandler.GetCardId();
-			_additionalUser = _userHandler.checkUser(_currentUserId.c_str());
+			_additionalUserId = users->readCurrentCardId();
+			_additionalUser = users->checkUser(_currentUserId);
 
-			if(_currentUser == String("Unknow user"))
+			if(_currentUser == "Unknow user")
 			{
-				this->PutCurrentStatus(WaitForSplitBooking);
+				this->setCurrentStatus(WaitForSplitBooking);
 				_additionalUserId = "";
 				_additionalUser = "";
 			}
-			this->PutCurrentStatus(Doppelt);
+			this->setCurrentStatus(Doppelt);
 		}
 	}
 
@@ -193,30 +193,30 @@ void Controller::States(char Status)
 
 void Controller::Reset()
 {
-	this->PutCurrentStatus(WaitForCard);
+	setCurrentStatus(WaitForCard);
 	_deltaTime = 0;
-	_currentUser = String("");
-	_additionalUser = String("");
-	_currentUserId = String("");
-	_additionalUserId = String("");
+	_currentUser = ("");
+	_additionalUser = ("");
+	_currentUserId = ("");
+	_additionalUserId = ("");
 }
 
 
-String Controller::GetCurrentUser()
+string Controller::getCurrentUser()
 {
-	return this->_currentUser;
+	return _currentUser;
 }
 
-void Controller::SetCurrentUser(String user)
+void Controller::setCurrentUser(string user)
 {
 	_currentUser = user;
 }
 
-char Controller::StateBegin(char state)
+MillStates Controller::beginState(MillStates state)
 {
-	this->PutCurrentStatus(state);
+	this->setCurrentStatus(state);
 	_startTime = millis();
-	this->UpDateTime();
+	this->updateDeltaTime();
 
 	return state;
 }

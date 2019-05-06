@@ -1,12 +1,18 @@
+#pragma once
+#ifndef defines_h
+#define defines_h
 // PIN DEFINES
 
-#define taster_LINKS_pin 7
-#define taster_RECHTS_pin 6
-#define nfc_RS_pin 2
-#define display_CLK_pin 0
-#define display_DATA_pin 1
-#define nfc_SS_pin 11
-#define sd_CS_pin 4
+enum PinConfiguration : char
+{
+	taster_LINKS_pin = 7,
+	taster_RECHTS_pin = 6,
+	nfc_RS_pin = 2,
+	display_CLK_pin = 0,
+	display_DATA_pin = 1,
+	nfc_SS_pin = 11,
+	sd_CS_pin = 4,
+};
 
 // WEB SERVER DEFINES
 
@@ -14,7 +20,7 @@
 #define SECRET_PASS "Werner"
 
 // STATES
-enum MillStates
+enum MillStates : char
 {
 	WaitForCard = 0,
 	ReadCard = 1,
@@ -28,3 +34,5 @@ enum MillStates
 	CurrentDrawsState = 9,
 	KaffeeKingState = 10
 };
+
+#endif

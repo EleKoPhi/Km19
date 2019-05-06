@@ -1,3 +1,4 @@
+#include <SD.h>
 #include <U8x8lib.h>
 #include <U8g2lib.h>
 #include <require_cpp11.h>
@@ -20,6 +21,6 @@ void setup()
 
 void loop()
 {
-  MillController->UpDateTime();
-  MillController->States(MillController->StateTransitions());
+  MillController->updateDeltaTime();
+  MillController->States(MillController->updateStateTransitions());
 }

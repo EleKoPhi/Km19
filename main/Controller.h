@@ -8,33 +8,33 @@
 
 class Controller
 {
-  public:
-  Controller(int chipSelect, int slaveSelect, int rstPin,int clk, int data);
-  void Begin();
-  void PutCurrentStatus(char stat);
-  char StateTransitions();
-  char GetCurrentStatus();
-  void UpDateTime();
-  void States(char Status);
-  bool TimeOut(int time);
-  void Reset();
-  char StateBegin(char state);
+public:
+	Controller(int chipSelect, int slaveSelect, int rstPin, int clk, int data);
+	void Begin();
+	void setCurrentStatus(MillStates stat);
+	MillStates updateStateTransitions();
+	MillStates getCurrentStatus();
+	unsigned long updateDeltaTime();
+	void States(MillStates Status);
+	bool TimeOut(int time);
+	void Reset();
+	MillStates beginState(MillStates state);
 
-  String GetCurrentUser();
-  void SetCurrentUser(String user);
-    
-  private:
-  Drawer _drawer;
-  WebServer _wifi;
-  char _currentStatus;
-  
-  String _currentUser;
-  String _currentUserId;
-  
-  String _additionalUser;
-  String _additionalUserId;
-  
-  unsigned long _startTime, _currentTime, _deltaTime;
+	string getCurrentUser();
+	void setCurrentUser(string user);
+
+private:
+	Drawer _drawer;
+	WebServer _webserver;
+	MillStates _currentStatus;
+
+	string _currentUser;
+	string _currentUserId;
+
+	string _additionalUser;
+	string _additionalUserId;
+
+	unsigned long _startTime, _currentTime, _deltaTime;
 };
 
 

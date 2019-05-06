@@ -42,7 +42,7 @@ FileReader::~FileReader()
 void FileWriter::write(const string& text)
 {
 #ifdef ARDUINO
-	file.print(text);
+	file.write(text.c_str());
 #else
 	file.write(text.c_str(), text.length());
 	if(!file.good())
@@ -56,48 +56,81 @@ void FileWriter::write(const string& text)
 #endif
 }
 
-streampos FileReader::position()
+streamposition FileReader::position()
 {
+#ifndef ARDUINO
 	return file.tellg();
+#else
+	return file.position();
+#endif
 }
 
-streampos FileReader::start()
+void FileReader::seekStart()
 {
-	return (file.beg);
+#ifndef ARDUINO
+	seek(file.beg);
+#else
+	seek(0);
+#endif
 }
 
-streampos FileReader::end()
+void FileReader::seekEnd()
 {
-	return (file.end);
+#ifndef ARDUINO
+	seek(file.end);
+#else
+	seek(length());
+#endif
 }
 
-void FileReader::seek(streampos position)
+void FileReader::seek(streamposition position)
 {
+#ifndef ARDUINO
 	file.seekg(position);
 	file.seekp(position);
+#else
+	file.seek(position);
+#endif
 }
 
-void FileReader::seek(streamoff offset, streampos from)
+void FileReader::seek(streamoffset offset, streamposition from)
 {
+#ifndef ARDUINO
 	file.seekg(offset, from);
 	file.seekp(offset, from);
+#else
+	file.seek(offset + from);
+#endif
 }
 
-streamoff FileReader::length()
+streamoffset FileReader::length()
 {
-	streampos backup = file.tellg();
+#ifndef ARDUINO
+	streamposition backup = file.tellg();
 	file.seekg(0, file.end);
-	streampos length = file.tellg();
+	streamposition length = file.tellg();
 	file.seekg(0, backup);
 	return length;
+#else
+	return file.size();
+#endif
 }
 
 bool FileReader::readToEnd(string & content)
 {
+#ifndef ARDUINO
 	std::stringstream buffer;
 	buffer << file.rdbuf();
 	content = buffer.str();
 	return true;
+#else
+	content = "";
+	while(file.available())
+	{
+		content = content + (char)file.read();
+	}
+	return true;
+#endif
 }
 
 bool FileReader::readLine(string & line)
@@ -138,8 +171,16 @@ bool FileReader::_readLine(string& line)
 
 void FileReader::open()
 {
-#ifdef ARDUNIO
-	file.open(SD.open(fileName, mode));
+#ifdef ARDUINO
+	UserHandler::sdCard();
+	file = SD.open(fileName.c_str(), mode);
+	if(!file)
+	{
+		//string status;
+		//int flags = file.rdstate();
+		//if (flags & eofbit)
+		log("file.open('" + fileName + "', " + to_string(mode) + ") failed.");
+	}
 #else
 	string path = TestFolder + fileName;
 	file.open(path, mode | fstream::out);

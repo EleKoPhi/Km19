@@ -19,12 +19,10 @@ const string UserHandler::UnknownUser = "unkonwn";
 UserHandler::UserHandler()
 {
 	SPI.begin();
-	RtcStatus = _rtc.begin();
-	_nfcReader.PCD_Init();
-	SdStatus = SD.begin(_cspin);
-	_nfcReader.PCD_Init();
-	NfcStatus = _nfcReader.PCD_PerformSelfTest();
-	_nfcReader.PCD_Init();
+	realTimeClock();
+	//_nfcReader.PCD_Init();
+	sdCard();
+	nfcReader();
 	pinMode(taster_LINKS_pin, INPUT);
 	pinMode(taster_RECHTS_pin, INPUT);
 }
@@ -59,13 +57,14 @@ TimeStamp::TimeStamp(tm * timestamp)
 #else
 TimeStamp TimeStamp::now()
 {
-	_rtc.begin();
-	DateTime now = _rtc.now();
-	_nfcReader.PCD_Init();  // Shit :O
+	auto rtc = UserHandler::realTimeClock();
+	rtc->begin();
+	DateTime now = rtc->now();
+	UserHandler::nfcReader();  // Shit :O
 	return TimeStamp(now);
 }
 
-TimeStamp::TimeStamp(DateTime& tmtimestamp)
+TimeStamp::TimeStamp(DateTime& timestamp)
 	: year(timestamp.year())
 	, month(timestamp.month())
 	, day(timestamp.day())
@@ -148,7 +147,7 @@ bool startswith(const string& text, string token)
 std::map<string, User> UserHandler::readUsers()
 {
 #if ARDUINO
-	SD.begin(_cspin);
+	sdCard();
 #endif
 	FileReader reader(UserFile);
 
@@ -179,10 +178,24 @@ std::map<string, User> UserHandler::readUsers()
 	return users;
 }
 
+string UserHandler::readCurrentCardId()
+{
+	long code = 0;
+	auto nfc = nfcReader();
+	if(nfc->PICC_ReadCardSerial())
+	{
+		for(byte i = 0; i < nfc->uid.size; i++)
+		{
+			code = ((code + nfc->uid.uidByte[i]) * 10);
+		}
+	}
+	return to_string(code);
+}
+
 string UserHandler::checkUser(const string & cardId)
 {
 #if ARDUINO
-	SD.begin(_cspin);
+	sdCard();
 #endif
 	FileReader reader(UserFile);
 	string line;
@@ -219,6 +232,7 @@ string UserHandler::checkUser(const string & cardId)
 void UserHandler::setUser(const string & cardIdInput, const string & name, bool isAllowed)
 {
 #ifdef ARDUINO
+	sdCard();
 	renameFile(UserFile, UserFile + ".bak");
 #else
 	string folder = TestFolder;
@@ -251,7 +265,7 @@ void UserHandler::setUser(const string & cardIdInput, const string & name, bool 
 void UserHandler::getUserStatistics(int & number, int & numberBlocked, int & numberUnnamed)
 {
 #if ARDUINO
-	SD.begin(_cspin);
+	sdCard();
 #endif
 	number = 0;
 	numberBlocked = 0;
@@ -309,9 +323,9 @@ vector<LogEntry> UserHandler::readLog(unsigned int maximum, string filename)
 	streamoff maxlen = (logEntryLength * maximum);
 	streamoff length = reader.length();
 	if(length < maxlen)
-		reader.seek(reader.start());
+		reader.seekStart();
 	else
-		reader.seek(length - maxlen, fstream::beg);
+		reader.seek(length - maxlen);
 	string line;
 	vector<LogEntry> entries;
 	for(int lines = 0; lines < maximum && reader.readLine(line); lines++)
@@ -355,6 +369,7 @@ int UserHandler::numberOfLogEntries()
 	return entries;
 }
 
+#ifndef ARDUINO
 namespace fs = std::experimental::filesystem;
 vector<string> UserHandler::getOldLogFiles()
 {
@@ -369,6 +384,29 @@ vector<string> UserHandler::getOldLogFiles()
 	}
 	return files;
 }
+#else
+vector<string> UserHandler::getOldLogFiles()
+{
+	vector<string> files;
+	auto dir = SD.open("/");
+	while(true)
+	{
+		File entry = dir.openNextFile();
+		if(!entry)
+			// no more files
+			break;
+
+		if(!entry.isDirectory())
+		{
+			string text = entry.name();
+			if(text.find("_log.csv") != string::npos)
+				files.push_back(text);
+		}
+		entry.close();
+	}
+	return files;
+}
+#endif
 
 void UserHandler::setParameter(const string & name, const double value)
 {
@@ -378,6 +416,7 @@ void UserHandler::setParameter(const string & name, const double value)
 void UserHandler::setParameter(const string & name, const string & value = "")
 {
 #ifdef ARDUINO
+	sdCard();
 	renameFile(ConfigFile, ConfigFile + ".bak");
 #else
 	string folder = TestFolder;
@@ -444,6 +483,31 @@ vector<Parameter> UserHandler::getParameters()
 		params.push_back(Parameter(param, value));
 	}
 	return params;
+}
+
+MillStates UserHandler::readButtonChoice()
+{
+	if(digitalRead(taster_LINKS_pin) /*&& !deboundeStatus*/)
+	{
+		//deboundeStatus = true;
+		Serial.println("l");
+		return MillStates::Einfach;
+	}
+	if(digitalRead(taster_RECHTS_pin)/* && !deboundeStatus*/)
+	{
+		//deboundeStatus = true;
+		Serial.println("r");
+		return MillStates::Doppelt;
+	}
+
+	return MillStates::WaitForInput;
+}
+
+bool UserHandler::isCardAvailable()
+{
+	auto nfc = nfcReader();
+	return nfc->PICC_IsNewCardPresent() == true;
+
 }
 
 string LogEntry::stdCardId(const string & cardId)

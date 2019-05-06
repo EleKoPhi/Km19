@@ -1,14 +1,22 @@
 #pragma once
-#include <cstdint>
 #include <string>
 #ifndef ARDUINO
+#include <cstdint>
 #include <fstream>
 #else
 #include <SD.h>
 #endif
 using namespace std;
 
-enum FileMode
+#ifndef ARDUINO
+typedef streampos streamposition;
+typedef streamoff streamoffset;
+#else
+typedef uint32_t streamposition;
+typedef uint32_t streamoffset;
+#endif
+
+enum FileMode : uint8_t
 {
 #ifndef ARDUINO
 	Read = fstream::in | fstream::binary,
@@ -27,12 +35,12 @@ public:
 	FileReader(string fileName, FileMode mode = FileMode::Read);
 	~FileReader();
 
-	streampos position();
-	streampos start();
-	streampos end();
-	void seek(streampos position);
-	void seek(streamoff offset, streampos from);
-	streamoff length();
+	streamposition position();
+	void seekStart();
+	void seekEnd();
+	void seek(streamposition position);
+	void seek(streamoffset offset, streamposition from);
+	streamoffset length();
 	bool readLine(string& line);
 	bool readToEnd(string &content);
 	string fileName;
@@ -68,3 +76,7 @@ protected:
 	//virtual void open();
 };
 
+void renameFile(string from, string to)
+{
+
+}

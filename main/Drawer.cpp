@@ -28,13 +28,17 @@ void Drawer::DrawErr(bool sdStatus, bool nfcStatus, bool rtcStatus)
   {
     _display.clearBuffer();
     _display.setFont(u8g2_font_ncenB10_tr);
-    _display.drawStr(0, 14, "System ERROR!");
+	string error = "";
+	if(!sdStatus) error = error + "SD-ERROR!";
+	if(!nfcStatus) error = error + "NFC-ERROR!";
+	if(!rtcStatus) error = error + "RTC-ERROR!";
+    _display.drawStr(0, 14, error.c_str());
     _display.sendBuffer();
     while (true);
   }
 }
 
-void Drawer::DrawLastUser(String lastUser)
+void Drawer::DrawLastUser(string lastUser)
 {
 	_display.clearBuffer();
 	_display.setFont(u8g2_font_ncenB08_tr);
@@ -44,7 +48,7 @@ void Drawer::DrawLastUser(String lastUser)
 	_display.sendBuffer();
 }
 
-void Drawer::DrawDes(String user)
+void Drawer::DrawDes(string user)
 {
   _display.clearBuffer();
   _display.setFont(u8g2_font_ncenB12_tr);
@@ -91,13 +95,13 @@ void Drawer::DrawUnknown()
   _display.sendBuffer();
 }
 
-void Drawer::DrawCenter(String txt, int y)
+void Drawer::DrawCenter(string txt, int y)
 {
   char pos = (128 - _display.getStrWidth(txt.c_str()))/2;
   _display.drawStr(pos, y, txt.c_str());
 }
 
-void Drawer::DrawKaffeeKing(String King)
+void Drawer::DrawKaffeeKing(string King)
 {
 	_display.clearBuffer();
 	_display.setFont(u8g2_font_ncenB08_tr);
@@ -110,7 +114,7 @@ void Drawer::DrawKaffeeKing(String King)
 
 void Drawer::DrawCurrentAmount(int amount)
 {
-	String a = String(amount, DEC);
+	string a = to_string(amount);
 	_display.clearBuffer();
 	_display.setFont(u8g2_font_ncenB08_tr);
 	this->DrawCenter("Anzahl Bezuege", 8);
