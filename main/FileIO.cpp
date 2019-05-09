@@ -3,6 +3,8 @@
 #include <sstream>
 #include "UserHandler.h"
 
+SdFat FileIOBase::SD;
+
 FileWriter::FileWriter(string fileName, FileMode mode)
 	: FileReader(fileName, mode)
 {
@@ -21,8 +23,8 @@ FileWriter::~FileWriter()
 FileReader::FileReader(string fileName, FileMode mode)
 	: fileName(fileName)
 	, mode(mode)
-#ifdef ARDUNIO
-	, file(SD.open(fileName, FileMode::Read))
+#ifdef ARDUINO
+	, file(FileIOBase::SD.open(fileName.c_str(), FileMode::Read))
 #else
 	, file()
 #endif
@@ -193,3 +195,14 @@ void FileReader::open()
 	}
 #endif
 }
+
+void renameFile(string from, string to)
+{
+	FileIOBase::SD.rename(from.c_str(), to.c_str());
+}
+
+bool fileExists(string file)
+{
+	FileIOBase::SD.exists(file.c_str());
+}
+

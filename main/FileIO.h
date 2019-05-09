@@ -1,11 +1,17 @@
 #pragma once
-#include <string>
+#ifndef FileIO_h
+#define FileIO_h
 #ifndef ARDUINO
 #include <cstdint>
 #include <fstream>
 #else
-#include <SD.h>
+//#undef INCLUDE_SDIOS
+//#define sdios_h
+#include <SdFat.h>
 #endif
+
+#include "defines.h"
+#include <string>
 using namespace std;
 
 #ifndef ARDUINO
@@ -16,7 +22,7 @@ typedef uint32_t streamposition;
 typedef uint32_t streamoffset;
 #endif
 
-enum FileMode : uint8_t
+enum FileMode : uint16_t
 {
 #ifndef ARDUINO
 	Read = fstream::in | fstream::binary,
@@ -29,7 +35,18 @@ enum FileMode : uint8_t
 #endif
 };
 
-class FileReader
+class FileIOBase
+{
+public:
+#ifdef ARDUINO
+	static SdFat SD;
+#endif
+	static bool sdCard()
+	{
+		return SD.begin((uint8_t)PinConfiguration::sd_CS_pin);
+	}
+};
+class FileReader : public FileIOBase
 {
 public:
 	FileReader(string fileName, FileMode mode = FileMode::Read);
@@ -46,12 +63,13 @@ public:
 	string fileName;
 	FileMode mode;
 
+
 protected:
 	virtual bool _readLine(string& line);
 
 	virtual void open();
 #ifdef ARDUINO
-	SDLib::File file;
+	File file;
 #else
 	fstream file;
 #endif
@@ -76,7 +94,8 @@ protected:
 	//virtual void open();
 };
 
-void renameFile(string from, string to)
-{
+void renameFile(string from, string to);
 
-}
+bool fileExists(string file);
+
+#endif

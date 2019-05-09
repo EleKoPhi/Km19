@@ -103,7 +103,7 @@ bool WebSitePlaceholderGroup::insertGroup(WebSitePlaceholderGroup & group)
 	//}
 	return false;
 }
-void WebSitePlaceholderGroup::setValues(const map<string, string>& values)
+void WebSitePlaceholderGroup::setValues(const std::map<string, string>& values)
 {
 	for(auto child : childrenValues)
 	{
@@ -121,7 +121,7 @@ void WebSitePlaceholderGroup::setValues(const map<string, string>& values)
 	}
 }
 
-void WebSitePlaceholderGroup::setGroup(const string & groupname, const map<string, string>& values)
+void WebSitePlaceholderGroup::setGroup(const string & groupname, const std::map<string, string>& values)
 {
 	for(auto child : childrenValues)
 	{

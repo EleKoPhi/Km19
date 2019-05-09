@@ -1,8 +1,10 @@
 #pragma once
 #ifndef defines_h
 #define defines_h
-// PIN DEFINES
 
+#define ARDUINO
+
+// PIN DEFINES
 enum PinConfiguration : char
 {
 	taster_LINKS_pin = 7,

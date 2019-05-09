@@ -1,4 +1,11 @@
-#include <SD.h>
+#include <WiFi101.h>
+#include "FileIO.h"
+#include <RTClib.h>
+#include <Wire.h>
+#include <SPI.h>
+#include <MinimumSerial.h>
+#include <FreeStack.h>
+#include <BlockDriver.h>
 #include <U8x8lib.h>
 #include <U8g2lib.h>
 #include <require_cpp11.h>
@@ -13,14 +20,14 @@ Controller* MillController;
 
 void setup()
 {
-	MillController = new Controller(sd_CS_pin, nfc_SS_pin, nfc_RS_pin, display_CLK_pin, display_DATA_pin);
-  //Serial.begin(9600);
-  //while (!Serial);
-  MillController->Begin();
+	MillController = new Controller();
+	//Serial.begin(9600);
+	//while (!Serial);
+	MillController->Begin();
 }
 
 void loop()
 {
-  MillController->updateDeltaTime();
-  MillController->States(MillController->updateStateTransitions());
+	MillController->updateDeltaTime();
+	MillController->States(MillController->updateStateTransitions());
 }

@@ -3,8 +3,8 @@
 
 
 
-#ifdef ARDUINO
-inline std::string to_string(int value)
+//#ifdef ARDUINO
+std::string to_string(int value)
 {
 	String ard(value, DEC);
 	std::string text(ard.begin());
@@ -18,4 +18,4 @@ double stod(std::string text)
 {
 	return String(text.c_str()).toDouble();
 }
-#endif
+//#endif

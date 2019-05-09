@@ -1,20 +1,24 @@
 #include "stdafx.h"
+#include "FileIO.h"
 #include "WebSiteImplementations.h"
 #include "UserHandler.h"
 #include "WebServer.h"
-#include "FileIO.h"
+#ifndef ARDUINO
 #include <filesystem>
+#endif
 
 void LogSite::fillPlaceholders()
 {
 	auto uh = UserHandler::getInstance();
 	{
-		map<string, string> values{{"currententries", to_string(uh->numberOfLogEntries())}};
+		std::map<string, string> values;
+		//{{"currententries", to_string(uh->numberOfLogEntries())}};
+		values["currententries"] = to_string(uh->numberOfLogEntries());
 		setValues(values);
 	}
 	{
-		map<string, User> users = uh->readUsers();
-		map<string, string> values;
+		std::map<string, User> users = uh->readUsers();
+		std::map<string, string> values;
 		for(auto entry : uh->readLog())
 		{
 			string name;
@@ -29,7 +33,7 @@ void LogSite::fillPlaceholders()
 		}
 	}
 	{
-		map<string, string> file;
+		std::map<string, string> file;
 		for(auto filename : uh->getOldLogFiles())
 		{
 			file["filename"] = filename;
@@ -66,7 +70,7 @@ void LogSite::handleRequest(WebRequest * request)
 		string content;
 		{
 			content = LogEntry::csvHeader();
-			map<string, User> users = uh->readUsers();
+			std::map<string, User> users = uh->readUsers();
 			for(auto entry : uh->readLog(UINT_MAX, filename))
 			{
 				string name;
@@ -79,7 +83,11 @@ void LogSite::handleRequest(WebRequest * request)
 		request->writeResponse(content, "200 OK", "application/octet-stream", "Content-Disposition: attachment; filename=\"" + filename + "\"");
 		return;
 	}
+#ifndef ARDUINO
 	if(!experimental::filesystem::exists(folder + LogFile))
+	#else
+	if(fileExists(LogFile))
+	#endif
 	{
 		FileWriter writer(LogFile, FileMode::Write);
 		writer.write("");
@@ -94,12 +102,11 @@ void UserSite::fillPlaceholders()
 	for(auto userentry : uh->readUsers())
 	{
 		User* user = &userentry.second;
-		map<string, string> values
-		{
-		{"cardid", user->cardId},
-		{"username", user->name},
-		{"isallowed", user->isAllowed ? "1" : "0"},
-		};
+		std::map<string, string> values;
+
+		values["cardid"] = user->cardId;
+		values["username"] = user->name;
+		values["isallowed"] = user->isAllowed ? "1" : "0";
 		setGroup("user", values);
 	}
 
@@ -121,7 +128,7 @@ void UserSite::handleRequest(WebRequest * request)
 void ConfigSite::fillPlaceholders()
 {
 	auto uh = UserHandler::getInstance();
-	map<string, string> values;
+	std::map<string, string> values;
 	for(auto param : uh->getParameters())
 	{
 		values["parameter"] = param.name;
@@ -156,7 +163,7 @@ void StartSite::fillPlaceholders()
 {
 	auto uh = UserHandler::getInstance();
 	{
-		map<string, string> values;
+		std::map<string, string> values;
 		values["logentries"] = to_string(uh->numberOfLogEntries());
 		setValues(values);
 		int users, blocked, unnamed;

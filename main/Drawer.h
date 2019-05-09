@@ -7,7 +7,7 @@
 class Drawer
 {
   public:
-    Drawer(int clk, int data);
+    Drawer();
     void DrawMain();
     void DrawErr(bool sdStatus, bool nfcStatus, bool rtcStatus);
     void DrawDes(string user);

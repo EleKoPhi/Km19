@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include "FileIO.h"
 #include "WebSite.h"
 #include "WebServer.h"
 
@@ -20,11 +21,10 @@ WebSite::WebSite(string targetFile)
 
 void WebSite::loadFile()
 {
+#ifndef ARDUINO
 	ifstream target;
 	target.open(
-	#ifdef _DEBUG
 		"C:\\src\\Arduino\\Km19\\HttpWindowsTest\\Debug\\" +
-	#endif
 		targetFileName);
 
 	string line;
@@ -39,6 +39,11 @@ void WebSite::loadFile()
 		}
 	siteTemplate.addValueDefinition("", targetHtml);
 	target.close();
+#else
+	FileReader reader(targetFileName);
+	targetHtml = "";
+	reader.readToEnd(targetHtml);
+#endif
 }
 
 bool WebSite::parseTags(WebSitePlaceholderGroup** group, string& fullHtml, string& line)
@@ -150,12 +155,12 @@ void WebSite::fillPlaceholders()
 
 }
 
-void WebSite::setValues(const map<string, string>& values)
+void WebSite::setValues(const std::map<string, string>& values)
 {
 	siteTemplate.setValues(values);
 }
 
-void WebSite::setGroup(const string & groupname, const map<string, string>& values)
+void WebSite::setGroup(const string & groupname, const std::map<string, string>& values)
 {
 	siteTemplate.setGroup(groupname, values);
 }

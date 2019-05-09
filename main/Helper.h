@@ -4,7 +4,6 @@
 
 #include "defines.h"
 
-#define __cplusplus 201103L
 #include "Arduino.h"
 #undef min
 #undef max
@@ -12,13 +11,26 @@
 #include <string>
 using namespace std;
 
-#ifdef ARDUINO
+//#ifdef ARDUINO
 
 std::string to_string(int value);
 
 int stoi(std::string text);
 double stod(std::string text);
 
-#endif
+class Exception : public exception
+{
+	std::string msg;
+public:
+	Exception(std::string what) : exception(), msg(what) {}
+	virtual ~Exception() {}
+
+	virtual const char* what() const throw()
+	{
+		return msg.c_str();
+	}
+};
+
+//#endif
 
 #endif

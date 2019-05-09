@@ -9,7 +9,7 @@
 class Controller
 {
 public:
-	Controller(int chipSelect, int slaveSelect, int rstPin, int clk, int data);
+	Controller();
 	void Begin();
 	void setCurrentStatus(MillStates stat);
 	MillStates updateStateTransitions();
@@ -24,17 +24,17 @@ public:
 	void setCurrentUser(string user);
 
 private:
-	Drawer _drawer;
-	WebServer _webserver;
-	MillStates _currentStatus;
+	Drawer drawer;
+	WebServer webServer;
+	MillStates currentStatus;
 
-	string _currentUser;
-	string _currentUserId;
+	string currentUser;
+	string currentUserId;
 
-	string _additionalUser;
-	string _additionalUserId;
+	string additionalUser;
+	string additionalUserId;
 
-	unsigned long _startTime, _currentTime, _deltaTime;
+	unsigned long startTime, currentTime, deltaTime;
 };
 
 

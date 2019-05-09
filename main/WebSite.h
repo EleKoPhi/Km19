@@ -6,8 +6,14 @@ using namespace std;
 class WebSite
 {
 protected:
-	void log(string str) { printf((str + "\n").c_str()); }
-	void verbose(string str) { printf((str + "\n").c_str()); }
+	void log(string str)
+	{
+	#ifndef ARDUINO
+		printf((str + "\n").c_str());
+	#else
+		Serial.println(str.c_str());
+	#endif
+	}
 
 	friend class WebServer;
 	friend class WebRequest;
@@ -24,8 +30,8 @@ protected:
 
 protected:
 	virtual void fillPlaceholders();
-	void setValues(const map<string, string>& values);
-	void setGroup(const string& groupname, const map<string, string>& values);
+	void setValues(const std::map<string, string>& values);
+	void setGroup(const string& groupname, const std::map<string, string>& values);
 
 public:
 	WebSite(string targetFile);

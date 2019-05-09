@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Helper.h"
 #include <vector>
 #include <map>
 using namespace std;
@@ -13,8 +14,15 @@ class WebSitePlaceholder
 	friend class WebSitePlaceholderGroup;
 
 protected:
-	void log(string str) { printf((str + "\n").c_str()); }
-	void verbose(string str) { printf((str + "\n").c_str()); }
+	void log(string str)
+	{
+	#ifndef ARDUINO
+		printf((str + "\n").c_str());
+	#else
+		Serial.println(str.c_str());
+	#endif
+	}
+
 	virtual WebSitePlaceholderGroup* asGroup() { return NULL; }
 
 public:
@@ -56,7 +64,7 @@ public:
 	WebSitePlaceholderGroup* addGroup();
 	virtual bool isGroup() { return true; }
 
-	void setValues(const map<string, string>& values);
-	void setGroup(const string& groupname, const map<string, string>& values);
+	void setValues(const std::map<string, string>& values);
+	void setGroup(const string& groupname, const std::map<string, string>& values);
 	virtual void prepare();
 };

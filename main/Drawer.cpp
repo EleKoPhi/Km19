@@ -1,7 +1,9 @@
+#include "Helper.h"
 #include "Drawer.h"
 #include <U8g2lib.h>
+#include "defines.h"
 
-Drawer::Drawer(int clk, int data): _display(U8G2_R0, clk, data, U8X8_PIN_NONE)
+Drawer::Drawer(): _display(U8G2_R0, PinConfiguration::display_CLK_pin, PinConfiguration::display_DATA_pin, U8X8_PIN_NONE)
 {
   _display.begin();
 }
@@ -16,7 +18,7 @@ void Drawer::DrawMain()
 {
   _display.clearBuffer();
   _display.setFont(u8g2_font_ncenB10_tr);
-  this->DrawCenter("UX-ES-2",12);
+  this->DrawCenter("EX-ES-2",12);
   _display.setFont(u8g2_font_ncenB10_tr);
   this->DrawCenter("! Karte auflegen !",32);
   _display.sendBuffer();
@@ -101,17 +103,17 @@ void Drawer::DrawCenter(string txt, int y)
   _display.drawStr(pos, y, txt.c_str());
 }
 
-void Drawer::DrawKaffeeKing(string King)
+void Drawer::DrawKaffeeKing(string king)
 {
 	_display.clearBuffer();
 	_display.setFont(u8g2_font_ncenB08_tr);
 	this->DrawCenter("Kaffee Koenig...", 8);
 	_display.setFont(u8g2_font_ncenB12_tr);
-	this->DrawCenter(King, 30);
+	this->DrawCenter(king, 30);
 	_display.sendBuffer();
 
 }
-
+std::string to_string(int value);
 void Drawer::DrawCurrentAmount(int amount)
 {
 	string a = to_string(amount);

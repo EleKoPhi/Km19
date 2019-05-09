@@ -1,16 +1,15 @@
+#include "FileIO.h"
 #include "stdafx.h"
 #include "Helper.h"
 #include "UserHandler.h"
 #include "defines.h"
 
 
-#include "FileIO.h"
 #ifndef ARDUINO
 #include <ctime> 
 #include <filesystem>
 #else
 #include <SPI.h>
-#include <SD.h>
 #include <MFRC522.h>
 #endif
 
@@ -146,7 +145,7 @@ bool startswith(const string& text, string token)
 
 std::map<string, User> UserHandler::readUsers()
 {
-#if ARDUINO
+#ifdef ARDUINO
 	sdCard();
 #endif
 	FileReader reader(UserFile);
@@ -194,7 +193,7 @@ string UserHandler::readCurrentCardId()
 
 string UserHandler::checkUser(const string & cardId)
 {
-#if ARDUINO
+#ifdef ARDUINO
 	sdCard();
 #endif
 	FileReader reader(UserFile);
@@ -264,7 +263,7 @@ void UserHandler::setUser(const string & cardIdInput, const string & name, bool 
 
 void UserHandler::getUserStatistics(int & number, int & numberBlocked, int & numberUnnamed)
 {
-#if ARDUINO
+#ifdef ARDUINO
 	sdCard();
 #endif
 	number = 0;
@@ -309,7 +308,7 @@ string UserHandler::writeLogLine(TimeStamp & timestamp, const string & cardId, L
 
 void UserHandler::writeLog(const string & cardId, LogEntryType entry)
 {
-	FileWriter writer(LogFile, FileMode::WriteAppend);
+	FileWriter writer(LogFile);
 
 	auto now = TimeStamp::now();
 	string line = writeLogLine(now, cardId, entry);
@@ -319,7 +318,7 @@ void UserHandler::writeLog(const string & cardId, LogEntryType entry)
 vector<LogEntry> UserHandler::readLog(unsigned int maximum, string filename)
 {
 	if(filename == "") filename = LogFile;
-	FileReader reader(filename, FileMode::Read);
+	FileReader reader(filename);
 	streamoff maxlen = (logEntryLength * maximum);
 	streamoff length = reader.length();
 	if(length < maxlen)
@@ -363,7 +362,7 @@ vector<LogEntry> UserHandler::readLog(unsigned int maximum, string filename)
 
 int UserHandler::numberOfLogEntries()
 {
-	FileReader reader(LogFile, FileMode::Read);
+	FileReader reader(LogFile);
 	streamoff length = reader.length();
 	int entries = length / logEntryLength;
 	return entries;
@@ -388,7 +387,7 @@ vector<string> UserHandler::getOldLogFiles()
 vector<string> UserHandler::getOldLogFiles()
 {
 	vector<string> files;
-	auto dir = SD.open("/");
+	auto dir = FileIOBase::SD.open("/");
 	while(true)
 	{
 		File entry = dir.openNextFile();

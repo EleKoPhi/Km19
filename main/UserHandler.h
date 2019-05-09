@@ -2,9 +2,9 @@
 #ifndef UserHandler_h
 #define UserHandler_h
 
-#ifdef ARDUINO
+#include "FileIO.h"
 #include "Helper.h"
-#include <SD.h>
+#ifdef ARDUINO
 #include <SPI.h>
 #include <MFRC522.h>
 #include <Wire.h>
@@ -18,6 +18,8 @@ using namespace std;
 
 #ifndef ARDUINO
 const string TestFolder = "C:\\src\\Arduino\\Km19\\HttpWindowsTest\\Debug\\";
+#else
+const string TestFolder = "";
 #endif
 
 class User
@@ -115,8 +117,11 @@ class UserHandler
 		Serial.println(str.c_str());
 	#endif
 	}
-	File _userData;
-	File _logFile;
+#ifndef ARDUINO
+#else
+	SdFat _userData;
+	SdFat _logFile;
+#endif
 
 	string writeLogLine(TimeStamp& timestamp, const string& cardId, LogEntryType entry);
 public:
@@ -156,7 +161,7 @@ public:
 	}
 	static void sdCard()
 	{
-		getInstance()->SdStatus = SD.begin(PinConfiguration::sd_CS_pin);
+		getInstance()->SdStatus = FileIOBase::sdCard();
 	}
 	static MFRC522* nfcReader()
 	{
